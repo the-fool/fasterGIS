@@ -2,8 +2,10 @@ import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app, request
 from flask.ext.login import UserMixin, AnonymousUserMixin
-from . import db, login_manager
+from . import login_manager
 from database import Base
+from sqlalchemy import Numeric, Column, ForeignKey, Integer, String, Table, text
+from sqlalchemy.orm import relationship
 
 i = 0
 def userSeq():
@@ -14,12 +16,11 @@ def userSeq():
 
 class User(UserMixin, Base):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, default=userSeq, primary_key=True)
-    email = db.Column(db.String(64), unique=True, index=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
-    confirmed = db.Column(db.Boolean, default=False)
-    name = db.Column(db.String(64))
+    id = Column(Integer, default=userSeq, primary_key=True)
+    email = Column(String(64), unique=True, index=True)
+    username = Column(String(64), unique=True, index=True)
+    password_hash = Column(String(128))
+    name = Column(String(64))
 
     @property
     def password(self):
