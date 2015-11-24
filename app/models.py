@@ -5,12 +5,18 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from . import db, login_manager
 from database import Base
 
+i = 0
+def userSeq():
+    global i
+    i += 1
+    return i
+
+
 class User(UserMixin, Base):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, default=userSeq, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(64))
