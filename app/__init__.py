@@ -4,18 +4,19 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flask_lazyviews import LazyViews
 from flask import session, redirect, current_app
-
+from celery import Celery
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.session_protection = None
 login_manager.login_view = 'auth.login'
-
+celery = Celery(__name__)
 
 def create_app(config_filename):
     app = Flask(__name__)
     app.debug = True
     app.config.from_pyfile(config_filename)
+    initCelery(app)
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
@@ -29,3 +30,14 @@ def create_app(config_filename):
     app.jinja_env.globals.update(title=str.title,
                                  iteritems=dict.iteritems, len=len)
     return app
+
+def initCelery(app):
+    global celery
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+    celery.Task = ContextTask
