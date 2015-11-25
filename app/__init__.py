@@ -5,12 +5,15 @@ from flask.ext.login import LoginManager
 from flask_lazyviews import LazyViews
 from flask import session, redirect, current_app
 from celery import Celery
+import config
+
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.session_protection = None
 login_manager.login_view = 'auth.login'
-celery = Celery(__name__)
+celery = Celery(__name__, broker=config.CELERY_BROKER_URL, 
+                backend=config.CELERY_RESULT_BACKEND)
 
 def create_app(config_filename):
     app = Flask(__name__)
