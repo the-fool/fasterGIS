@@ -1,5 +1,6 @@
-from flask import jsonify
+from flask import jsonify, url_for
 from . import tasks
+from .celtasks import foo
 
 @tasks.route('/foo_status/<task_id>')
 def foostatus(task_id):

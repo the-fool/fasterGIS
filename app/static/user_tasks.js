@@ -3,7 +3,7 @@ function start_task() {
     $('#progress').append(div);
     $.ajax({
         type: 'POST',
-        url: '/foo',
+        url: '/tasks/foo',
         success: function(data, status, request) {
             status_url = request.getResponseHeader('Location');
             update_progress(status_url, div[0]);

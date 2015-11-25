@@ -7,7 +7,7 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from database import Base
 from sqlalchemy import Numeric, DateTime, Column, ForeignKey, Integer, String, Table, text, Sequence
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 
 
@@ -18,6 +18,9 @@ class User(UserMixin, Base):
     username = Column(String(64), unique=True, index=True)
     password_hash = Column(String(128))
     name = Column(String(64))
+
+    tasks = relationship('Task', backref='user', 
+                         cascade="all, delete, delete-orphan")
 
     @property
     def password(self):
@@ -52,6 +55,10 @@ class Task(Base):
     result = Column(String(200))
     date_done = Column(DateTime)
     traceback = Column(String(700))
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    user = relationship('User', backref=backref('tasks'))
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
