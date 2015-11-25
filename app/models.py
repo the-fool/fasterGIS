@@ -1,3 +1,5 @@
+import os
+import errno
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app, request
@@ -31,6 +33,16 @@ class User(UserMixin, Base):
     def __repr__(self):
         return '<User %r>' % self.username
 
+    def build_directory(self):
+        user_dir = 'users/{0}'.format(self.id)
+        assert not os.path.exists(user_dir)
+        try:
+            os.makedirs('{0}/data'.format(user_dir))
+            os.makedirs('{0}/results'.format(user_dir))
+            os.makedirs('{0}/scripts'.format(user_dir))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
