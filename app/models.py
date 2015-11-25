@@ -44,6 +44,15 @@ class User(UserMixin, Base):
             if e.errno != errno.EEXIST:
                 raise
 
+class Task(Base):
+    __tablename__ = 'tasks'
+    id = Column(Integer, Sequence('task_sq'), primary_key=True)
+    task_id = Column(String(765), unique=True)
+    status = Column(String(150))
+    result = Column(String(200))
+    date_done = Column(DateTime)
+    traceback = Column(String(700))
+
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False

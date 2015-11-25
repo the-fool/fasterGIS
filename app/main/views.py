@@ -16,23 +16,19 @@ def index():
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first()
-    if user:
+    if user and current_user.id == user.id:
         return render_template('user.html', user=user)
+    elif user:
+        return render_template('public_user.html', user=user)
     else:
         return abort(404)
 
-@main.route('/multiply')
-def multiply():
-    result = mult.delay(2,2)
-    
-    return 'ok'
 
 @main.route('/longtask', methods=['POST'])
 def longtask():
     task = long_task.apply_async()
     return jsonify({}), 202, {'Location': url_for('.taskstatus',
                                                   task_id=task.id)}
-
 
 @main.route('/status/<task_id>')
 def taskstatus(task_id):
