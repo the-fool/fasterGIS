@@ -34,7 +34,7 @@ class User(UserMixin, Base):
         return '<User %r>' % self.username
 
     def build_directory(self):
-        user_dir = 'users/{0}'.format(self.id)
+        user_dir = '{0}/app/users/{1}'.format(os.getcwd(),self.id)
         assert not os.path.exists(user_dir)
         try:
             os.makedirs('{0}/data'.format(user_dir))

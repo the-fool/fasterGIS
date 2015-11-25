@@ -31,6 +31,9 @@ def create_app(config_filename):
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
+    from .tasks import tasks as tasks_blueprint
+    app.register_blueprint(tasks_blueprint, url_prefix='/tasks')
+
     app.jinja_env.globals.update(title=str.title,
                                  iteritems=dict.iteritems, len=len)
     return app

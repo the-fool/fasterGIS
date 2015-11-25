@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 import shutil
 import datetime
+import errno
 
 engine = create_engine(os.environ.get('DEV_DATABASE_URL'), convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -18,6 +19,13 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 def init_users():
-    t = datetime.date.today()
-    shutil.copytree(src='users', dst='users.bak/{0}'.format(t))
-    shutil.rmtree('users')
+    t = str(datetime.datetime.utcnow())
+    t.replace(' ', '_')
+    cwd = os.getcwd()
+    try:
+        shutil.copytree(src='{0}/app/users'.format(cwd), dst='users.bak/{0}'.format(t))
+        shutil.rmtree('{0}/app/users'.format(cwd))
+    except OSError as e:
+        if e.errno != 2:
+            raise
+    
