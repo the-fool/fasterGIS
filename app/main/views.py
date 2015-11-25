@@ -27,12 +27,53 @@ def user(username):
         return abort(404)
 
 
+@main.route('/foo_status/<task_id>')
+def foostatus(task_id):
+    task = foo.AsyncResult(task_id)
+    if task.state == 'PENDING':
+        response = {
+            'state': task.state,
+            'current': 0,
+            'status': 'Pending...'
+        }
+    elif task.state != 'FAILURE':
+        response = {
+            'state': task.state,
+            'current': task.info.get('current', 0),
+            'status': task.info.get('status', '')
+        }
+    else:
+        response = {
+            'state': task.state,
+            'current': 1,
+            'status': str(task.info),  # this is the exception raised
+        }
+    return jsonify(response)
+
+
+@main.route('/foo', methods=['POST'])
+def run_foo():
+    task = foo.apply_async()
+    return jsonify({}), 202, {'Location': url_for('.foostatus', 
+                                                  task_id=task.id)
+    
+@celery.task(bind=True)
+def foo(self):
+    proc = subprocess.Popen('/var/www/fastGIS/long', 
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while proc.poll() is None:
+        line = proc.stdout.readline() 
+        sys.stdout.write(line)
+        self.update_state(state='PROGRESS',
+                          meta={'current': line})
+    proc.wait()
+
+
 @main.route('/longtask', methods=['POST'])
 def longtask():
     task = long_task.apply_async()
     return jsonify({}), 202, {'Location': url_for('.taskstatus',
                                                   task_id=task.id)}
-
 
 @main.route('/status/<task_id>')
 def taskstatus(task_id):
@@ -63,18 +104,6 @@ def taskstatus(task_id):
             'status': str(task.info),  # this is the exception raised
         }
     return jsonify(response)
-
-@main.route('/foo')
-def run_foo():
-    task = foo.apply_async()
-    return 'running'
-
-@celery.task(bind=True)
-def foo(self):
-    proc = subprocess.Popen('ls', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    for line in proc.stdout:
-        sys.stdout.write(line)
-    proc.wait()
 
 @celery.task(bind=True)
 def long_task(self):
