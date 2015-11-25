@@ -7,6 +7,9 @@ from .. import celery
 import random
 import time
 import os
+import sys
+import subprocess
+
 
 @main.route('/')
 def index():
@@ -29,6 +32,7 @@ def longtask():
     task = long_task.apply_async()
     return jsonify({}), 202, {'Location': url_for('.taskstatus',
                                                   task_id=task.id)}
+
 
 @main.route('/status/<task_id>')
 def taskstatus(task_id):
@@ -60,6 +64,17 @@ def taskstatus(task_id):
         }
     return jsonify(response)
 
+@main.route('/foo')
+def run_foo():
+    task = foo.apply_async()
+    return 'running'
+
+@celery.task(bind=True)
+def foo(self):
+    proc = subprocess.Popen('ls', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in proc.stdout:
+        sys.stdout.write(line)
+    proc.wait()
 
 @celery.task(bind=True)
 def long_task(self):

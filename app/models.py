@@ -6,7 +6,7 @@ from flask import current_app, request
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from database import Base
-from sqlalchemy import Numeric, Column, ForeignKey, Integer, String, Table, text, Sequence
+from sqlalchemy import Numeric, DateTime, Column, ForeignKey, Integer, String, Table, text, Sequence
 from sqlalchemy.orm import relationship
 
 
