@@ -10,7 +10,6 @@ from sqlalchemy import Numeric, DateTime, Column, ForeignKey, Integer, String, T
 from sqlalchemy.orm import relationship, backref
 
 
-
 class User(UserMixin, Base):
     __tablename__ = 'users'
     id = Column(Integer, Sequence('user_seq'), primary_key=True)
@@ -56,8 +55,6 @@ class Task(Base):
     date_done = Column(DateTime)
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))
-
-    user = relationship('User', backref=backref('tasks'))
 
 
 class AnonymousUser(AnonymousUserMixin):
