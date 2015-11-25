@@ -42,6 +42,8 @@ def foostatus(task_id):
             'current': task.info.get('current', 0),
             'status': task.info.get('status', '')
         }
+        if 'result' in task.info:
+            response['result'] = task.info['result']
     else:
         response = {
             'state': task.state,
@@ -55,11 +57,12 @@ def foostatus(task_id):
 def run_foo():
     task = foo.apply_async()
     return jsonify({}), 202, {'Location': url_for('.foostatus', 
-                                                  task_id=task.id)
+                                                  task_id=task.id)}
     
 @celery.task(bind=True)
 def foo(self):
-    proc = subprocess.Popen('/var/www/fastGIS/long', 
+    cwd = os.getcwd()
+    proc = subprocess.Popen('{0}/long'.format(cwd),
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while proc.poll() is None:
         line = proc.stdout.readline() 
@@ -67,7 +70,8 @@ def foo(self):
         self.update_state(state='PROGRESS',
                           meta={'current': line})
     proc.wait()
-
+    return {'current': 100, 'total': 100, 'status': 'Task completed!',
+            'result': 'FINISHED!!'}
 
 @main.route('/longtask', methods=['POST'])
 def longtask():
