@@ -19,7 +19,8 @@ def create_app(config_filename):
     app = Flask(__name__)
     app.debug = True
     app.config.from_pyfile(config_filename)
-    initCelery(app)
+    celery = initCelery(app)
+    
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
@@ -43,4 +44,6 @@ def initCelery(app):
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return TaskBase.__call__(self, *args, **kwargs)
+    
     celery.Task = ContextTask
+    return celery
