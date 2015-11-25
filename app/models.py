@@ -4,19 +4,14 @@ from flask import current_app, request
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from database import Base
-from sqlalchemy import Numeric, Column, ForeignKey, Integer, String, Table, text
+from sqlalchemy import Numeric, Column, ForeignKey, Integer, String, Table, text, Sequence
 from sqlalchemy.orm import relationship
 
-i = 0
-def userSeq():
-    global i
-    i += 1
-    return i
 
 
 class User(UserMixin, Base):
     __tablename__ = 'users'
-    id = Column(Integer, default=userSeq, primary_key=True)
+    id = Column(Integer, Sequence('user_seq'), primary_key=True)
     email = Column(String(64), unique=True, index=True)
     username = Column(String(64), unique=True, index=True)
     password_hash = Column(String(128))
