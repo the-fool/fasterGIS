@@ -4,7 +4,7 @@ import os
 import subprocess
 from celery.signals import task_revoked
 
-@celery.task(bind=True)
+@celery.task(bind=True, name='fooboo')
 def foo(self):
     cwd = os.getcwd()
     proc = subprocess.Popen('{0}/long'.format(cwd),
@@ -18,6 +18,9 @@ def foo(self):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
             'result': 'FINISHED!!'}
 
-@task_revoked.connect(sender='foo')
+@task_revoked.connect
 def foo_revoked(*args, **kwargs):
-    print "I, Foo, was revoked"
+    f = open('foo.txt','w')
+    f.write('celtasks')
+    f.close()
+    print "I, Foo, was revoked in celtask"

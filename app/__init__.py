@@ -19,7 +19,7 @@ def create_app(config_filename):
     app = Flask(__name__)
     app.debug = True
     app.config.from_pyfile(config_filename)
-    celery = initCelery(app)
+
     
     db.init_app(app)
     bootstrap.init_app(app)
@@ -33,12 +33,12 @@ def create_app(config_filename):
 
     from .tasks import tasks as tasks_blueprint
     app.register_blueprint(tasks_blueprint, url_prefix='/tasks')
-
+    celery = init_celery(app)
     app.jinja_env.globals.update(title=str.title,
                                  iteritems=dict.iteritems, len=len)
     return app
 
-def initCelery(app):
+def init_celery(app):
     global celery
     celery.conf.update(app.config)
     TaskBase = celery.Task
