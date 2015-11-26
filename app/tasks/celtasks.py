@@ -2,7 +2,7 @@ from .. import celery
 import sys
 import os
 import subprocess
-
+from celery.signals import task_revoked
 
 @celery.task(bind=True)
 def foo(self):
@@ -18,3 +18,6 @@ def foo(self):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
             'result': 'FINISHED!!'}
 
+@task_revoked.connect(sender='foo')
+def foo_revoked(*args, **kwargs):
+    print "I, Foo, was revoked"

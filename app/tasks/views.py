@@ -33,3 +33,4 @@ def run_foo():
     task = foo.apply_async()
     return jsonify({}), 202, {'Location': url_for('.foostatus',
                                                   task_id=task.id)}
+
