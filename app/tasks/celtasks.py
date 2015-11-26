@@ -12,8 +12,11 @@ def foo(self):
     while proc.poll() is None:
         line = proc.stdout.readline()
         sys.stdout.write(line)
-        self.update_state(state='PROGRESS',
-                          meta={'current': line})
+       # if fooboo.id != 'KILLED':
+       self.update_state(state='PROGRESS',
+                              meta={'current': line})
+        else:
+            proc.terminate()
     proc.wait()
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
             'result': 'FINISHED!!'}
