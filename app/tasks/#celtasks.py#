@@ -18,7 +18,7 @@ def foo(self):
                               meta={'current': 'just scaled'})
         else:
             line = proc.stdout.readline()
-            sys.stdout.write("Hey!"+line)
+            sys.stdout.write(line)
             
             self.update_state(state='PROGRESS',
                               meta={'current': str(line)})

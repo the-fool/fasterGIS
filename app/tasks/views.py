@@ -13,7 +13,7 @@ def foostatus(task_id):
     if task.state == 'PENDING':
         response = {
             'state': task.state,
-            'current': 0,
+            'current': 'pending',
             'status': 'Pending...'
         }
     elif task.state == 'PROGRESS':

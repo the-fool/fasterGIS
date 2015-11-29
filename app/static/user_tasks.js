@@ -5,8 +5,7 @@ function start_task() {
         type: 'POST',
         url: '/tasks/foo',
         success: function(data, status, request) {
-            status_url = request.getResponseHeader('Progress');
-            
+            status_url = request.getResponseHeader('Progress');            
 	    update_progress(status_url, div[0]);
         },
         error: function() {

@@ -77,7 +77,7 @@ int manage_script(int rank, int iterations){
     pid = exec_script(pfd); 
     while (!DORMANT && (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) {
       buff[nbytes] = '\0';
-      printf("Proc %d: %s\n", rank, buff);
+      printf("Proc %d: %s", rank, buff);
     } 
     close(pfd[0]);
     // check if EOF or SIGUSR1
@@ -122,5 +122,5 @@ int do_master() {
     if ( (cptr = strchr(buff, '\n')) != NULL) *cptr = '\0';
    
     MPI_Send(buff, strlen(buff) + 1, MPI_CHAR, 1, 0, MPI_COMM_WORLD);
-  }
+    }
 }
