@@ -6,20 +6,24 @@ from .. import celery
 from celery.task.control import revoke
 from celery.signals import task_revoked
 
-task = None
-
 @tasks.route('/foo_status/<task_id>')
 def foostatus(task_id):
     task = foo.AsyncResult(task_id)
 
-
-   # revoke(task_id, terminate=True)
     if task.state == 'PENDING':
         response = {
             'state': task.state,
             'current': 0,
             'status': 'Pending...'
         }
+    elif task.state == 'PROGRESS':
+        response = {
+            'state': task.state,
+            'current': task.info.get('current', 0),
+            'status': task.info.get('status', '')
+        }
+        if 'result' in task.info:
+            response['result'] = task.info['result']
     elif task.state != 'FAILURE':
         response = {
             'state': task.state,
@@ -39,27 +43,24 @@ def foostatus(task_id):
 
 @tasks.route('/foo', methods=['POST'])
 def run_foo():
-    global task
     task = foo.apply_async()
-    sleep(1)
-#    print 'revoking'
-    celery.control.revoke(task.id, terminate=True)
-    return jsonify({}), 202, {'Location': url_for('.foostatus',
-                                                  task_id=task.id)}
+    return jsonify({}), 202, {'Progress': url_for('.foostatus',
+                                                  task_id=task.id),
+                              'Scale': url_for('.scale_foo',
+                                               task_id=task.id),
+                              'Revoke': url_for('.revoke_foo',
+                                                task_id=task.id)  }
 
-@tasks.route('/revoke_foo', methods=['POST'])
-def revoke_foo():
+@tasks.route('/revoke_foo/<task_id>', methods=['POST'])
+def revoke_foo(task_id):
     return 'revoked'
 
-@tasks.route('/kill_foo')
-def kill_foo():
-    global task
-    task.update_state(state='KILLED', meta={'killed': True})
+@tasks.route('/scale_foo/<task_id>', methods=['POST'])
+def scale_foo(task_id):
+    return 'scaled'
 
-@task_revoked.connect
-def foo_revoked(*args, **kwargs):
-    f = open('foo.txt', 'w')
-    f.write('foo to you')
-    f.close()
-    print "I, Foo, was revoked"
+@tasks.route('/kill_foo/<task_id>')
+def kill_foo():
+    task = foo.AsyncResult(task_id)
+    task.update_state(state='KILLED', meta={'killed': True})
 
