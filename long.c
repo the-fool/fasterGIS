@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <string.h>
+#include <signal.h>
 
 #define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
 #define MAX_BUFF 4096
@@ -25,6 +26,10 @@ int main(int argc, char *argv[]) {
     do_slave(world_rank);
  
   MPI_Finalize();
+}
+
+void stop_py(int signum) {
+  printf("caught sig %d\n", signum);
 }
 
 int do_slave(int rank) {
@@ -52,21 +57,24 @@ int do_slave(int rank) {
     die("fork");
   
   if (pid == 0) {
+    signal(SIGUSR1, stop_py);
+
     while ((nbytes = read(pyfd[0], pybuff, MAX_BUFF)) > 0) {
       pybuff[nbytes] = '\0';
       printf("Python proc %d: %s\n", rank, pybuff);
     }
-  } else {
-  
-    // finally, let the parent of both processes receive MPI messages
+  } 
+  // finally, let the parent of both processes receive MPI messages
+  else {
     MPI_Status status;
     while (1) {
       MPI_Recv(&mpibuff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
       printf("Proc %d: %s\n", rank, mpibuff);
+      if (strcmp(mpibuff, "sigusr") == 0) {
+	kill(pid, SIGUSR1);
+      }
     }
   }
-
-
 }
 
 int do_master() {
