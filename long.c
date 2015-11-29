@@ -10,6 +10,8 @@
 
 int do_slave(int rank);
 int do_master();
+pid_t exec_script(int *pfd);
+int manage_script(int rank);
 
 int main(int argc, char *argv[]) {
 
@@ -28,6 +30,7 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
 }
 
+
 int PAUSED = 0;
 
 void stop_py(int signum) {
@@ -36,57 +39,70 @@ void stop_py(int signum) {
 }
 
 int do_slave(int rank) {
-  int pyfd[2], mpifd[2], nbytes;
-  pid_t py_pid, mpi_pid;
+  pid_t pid;
   char pybuff[MAX_BUFF], mpibuff[MAX_BUFF];
   
-  // first, execute computation script
-  if (pipe(pyfd) == -1)
+  if ((pid=fork()) == -1)
     die("pipe");
-  if ((py_pid=fork()) == -1)
-    die("fork");
-  
-  if (py_pid == 0) {
-    dup2(pyfd[1], STDOUT_FILENO);
-    close(pyfd[0]); 
-    close(pyfd[1]);
-    execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/bar.py", (char*)0 );
-    die("execl");
-  }
- 
-  close(pyfd[1]);
-  // second, set up dedicated logger  
-  if ((mpi_pid=fork()) == -1)
-    die("fork");
-  
-  if (mpi_pid == 0) {
-    struct sigaction act;
-    act.sa_handler = stop_py;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-    sigaction(SIGUSR1, &act, 0);
-    
-    while (!PAUSED) {
-      while (!PAUSED && (nbytes = read(pyfd[0], pybuff, MAX_BUFF)) > 0) {
-	pybuff[nbytes] = '\0';
-	printf("Python proc %d: %s\n", rank, pybuff);
-      }
-      //kill(pypid, SIGINT);
-      pause();
-    }
-  } 
-  // finally, let the parent of both processes receive MPI messages
-  else {
+  if (pid == 0) {
+    manage_script(rank);
+  } else {
+    // MPI msg listener
     MPI_Status status;
     while (1) {
       MPI_Recv(&mpibuff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
       printf("Proc %d: %s\n", rank, mpibuff);
+      
       if (strcmp(mpibuff, "sigusr") == 0) {
-	kill(mpi_pid, SIGUSR1);
+	kill(pid, SIGUSR1);
       }
     }
   }
 }
+
+int manage_script(int rank){
+  int pfd[2], nbytes; 
+  char buff[MAX_BUFF];
+  pid_t pid;
+
+  // first, execute computation script
+  // second, set up dedicated logger  
+  pid = exec_script(pfd);
+
+  struct sigaction act;
+  act.sa_handler = stop_py;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+  sigaction(SIGUSR1, &act, 0);
+    
+  while (!PAUSED) {
+    while (!PAUSED && (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) {
+      buff[nbytes] = '\0';
+      printf("Python proc %d: %s\n", rank, buff);
+    }
+    //kill(pypid, SIGINT);
+    pause();
+  }
+} 
+
+pid_t exec_script(int *pfd) {
+  pid_t pid;
+
+  if (pipe(pfd) == -1)
+    die("pipe");
+  if ((pid=fork()) == -1)
+    die("fork");
+  if (pid == 0) {
+    dup2(pfd[1], STDOUT_FILENO);
+    close(pfd[0]); 
+    close(pfd[1]);
+    execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/bar.py", (char*)0 );
+    die("execl");
+  }
+  close(pfd[1]);
+  return pid;
+}
+
 
 int do_master() {
   char buff[MAX_BUFF];
