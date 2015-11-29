@@ -1,12 +1,13 @@
 function start_task() {
-    div = $('<div class="progress"></div>');
+    div = $('<div class="cel_progress"></div><div><button id="scale-foo">Scale Foo</button><br>');
     $('#progress').append(div);
     $.ajax({
         type: 'POST',
         url: '/tasks/foo',
         success: function(data, status, request) {
-            status_url = request.getResponseHeader('Location');
-            update_progress(status_url, div[0]);
+            status_url = request.getResponseHeader('Progress');
+            
+	    update_progress(status_url, div[0]);
         },
         error: function() {
             alert('Unexpected error');
@@ -32,6 +33,7 @@ function update_progress(status_url, status_div) {
         }
     });
 }
+
 $(function() {
     $('#start-bg-job').click(start_task);
 });

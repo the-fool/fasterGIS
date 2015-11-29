@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <string.h>
+
 #define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
 #define MAX_BUFF 4096
 
@@ -26,31 +28,56 @@ int main(int argc, char *argv[]) {
 }
 
 int do_slave(int rank) {
-  int pfd[2], nbytes;
+  int pyfd[2], mpifd[2], nbytes;
   pid_t pid;
-  char buff[MAX_BUFF];
+  char pybuff[MAX_BUFF], mpibuff[MAX_BUFF];
   
-  if (pipe(pfd) == -1)
+  // first, execute computation script
+  if (pipe(pyfd) == -1)
     die("pipe");
-  
   if ((pid=fork()) == -1)
     die("fork");
   
   if (pid == 0) {
-    dup2(pfd[1], STDOUT_FILENO);
-    close(pfd[0]); 
-    close(pfd[1]);
+    dup2(pyfd[1], STDOUT_FILENO);
+    close(pyfd[0]); 
+    close(pyfd[1]);
     execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/bar.py", (char*)0 );
     die("execl");
-  }else {
-    close(pfd[1]);
-    while ((nbytes = read(pfd[0], buff, sizeof(buff))) > 0) {
-      buff[nbytes] = '\0';
-      printf("Proc %d: %s\n", rank, buff);
+  }
+ 
+  close(pyfd[1]);
+  // second, set up dedicated logger  
+  if ((pid=fork()) == -1)
+    die("fork");
+  
+  if (pid == 0) {
+    while ((nbytes = read(pyfd[0], pybuff, MAX_BUFF)) > 0) {
+      pybuff[nbytes] = '\0';
+      printf("Python proc %d: %s\n", rank, pybuff);
+    }
+  } else {
+  
+    // finally, let the parent of both processes receive MPI messages
+    MPI_Status status;
+    while (1) {
+      MPI_Recv(&mpibuff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+      printf("Proc %d: %s\n", rank, mpibuff);
     }
   }
+
+
 }
 
 int do_master() {
-
+  char buff[MAX_BUFF];
+  char *cptr;
+  
+  printf("Send a msg: \n");
+  while (1) {
+    fgets(buff, MAX_BUFF, stdin);
+    if ( (cptr = strchr(buff, '\n')) != NULL) *cptr = '\0';
+   
+    MPI_Send(buff, strlen(buff) + 1, MPI_CHAR, 1, 0, MPI_COMM_WORLD);
+  }
 }
