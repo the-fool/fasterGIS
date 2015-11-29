@@ -28,22 +28,25 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
 }
 
+int PAUSED = 0;
+
 void stop_py(int signum) {
   printf("caught sig %d\n", signum);
+  PAUSED = !PAUSED;
 }
 
 int do_slave(int rank) {
   int pyfd[2], mpifd[2], nbytes;
-  pid_t pid;
+  pid_t py_pid, mpi_pid;
   char pybuff[MAX_BUFF], mpibuff[MAX_BUFF];
   
   // first, execute computation script
   if (pipe(pyfd) == -1)
     die("pipe");
-  if ((pid=fork()) == -1)
+  if ((py_pid=fork()) == -1)
     die("fork");
   
-  if (pid == 0) {
+  if (py_pid == 0) {
     dup2(pyfd[1], STDOUT_FILENO);
     close(pyfd[0]); 
     close(pyfd[1]);
@@ -53,15 +56,23 @@ int do_slave(int rank) {
  
   close(pyfd[1]);
   // second, set up dedicated logger  
-  if ((pid=fork()) == -1)
+  if ((mpi_pid=fork()) == -1)
     die("fork");
   
-  if (pid == 0) {
-    signal(SIGUSR1, stop_py);
-
-    while ((nbytes = read(pyfd[0], pybuff, MAX_BUFF)) > 0) {
-      pybuff[nbytes] = '\0';
-      printf("Python proc %d: %s\n", rank, pybuff);
+  if (mpi_pid == 0) {
+    struct sigaction act;
+    act.sa_handler = stop_py;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGUSR1, &act, 0);
+    
+    while (!PAUSED) {
+      while (!PAUSED && (nbytes = read(pyfd[0], pybuff, MAX_BUFF)) > 0) {
+	pybuff[nbytes] = '\0';
+	printf("Python proc %d: %s\n", rank, pybuff);
+      }
+      //kill(pypid, SIGINT);
+      pause();
     }
   } 
   // finally, let the parent of both processes receive MPI messages
@@ -71,7 +82,7 @@ int do_slave(int rank) {
       MPI_Recv(&mpibuff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
       printf("Proc %d: %s\n", rank, mpibuff);
       if (strcmp(mpibuff, "sigusr") == 0) {
-	kill(pid, SIGUSR1);
+	kill(mpi_pid, SIGUSR1);
       }
     }
   }
