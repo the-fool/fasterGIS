@@ -83,4 +83,8 @@ $(function() {
 	});
 	$detail.find('.progress-bar').text(row['task_id']);
     });
+    $('table').on('click-row.bs.table', function(e,row,$tr) {
+        $tr.find('>td>.detail-icon').trigger('click');
+    });
+
 });

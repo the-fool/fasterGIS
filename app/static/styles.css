@@ -1,3 +1,4 @@
-.stylish {
-    extra-styled: so_true;
+.custom-hover > tbody > tr:not(.detail-view):hover td {
+    background-color:  #739Bf1 !important;
+    cursor: pointer;
 }
