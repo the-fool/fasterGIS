@@ -50,9 +50,10 @@ class Task(Base):
     __tablename__ = 'tasks'
     id = Column(Integer, Sequence('task_sq'), primary_key=True)
     task_id = Column(String(765), unique=True)
-    status = Column(String(150))
-    result = Column(String(200))
+    status = Column(String(150), default='Pending')
+    name = Column(String(64), default=None)
     input = Column(String(512), default=None)
+    date_begun = Column(DateTime)
     date_done = Column(DateTime)
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))
@@ -64,11 +65,12 @@ class Task(Base):
             'id' : self.id,
             'task_id' : self.task_id,
             'status' : self.status,
-            'result' : self.result,
+            'name' : self.name,
             'input' : self.input,
             'traceback' : self.traceback,
             'user_id' : self.user_id,
-            'date_done' : dump_datetime(self.date_done)
+            'date_done' : dump_datetime(self.date_done),
+            'date_begun' : dump_datetime(self.date_begun)
         }
 
 class AnonymousUser(AnonymousUserMixin):
