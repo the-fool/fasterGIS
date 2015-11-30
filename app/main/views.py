@@ -20,7 +20,7 @@ def index():
 def user(username):
     user = User.query.filter_by(username=username).first()
     if user and current_user.id == user.id:
-        return render_template('user.html', user=user)
+        return render_template('dashboard.html', user=user)
     elif user:
         return render_template('public_user.html', user=user)
     else:
