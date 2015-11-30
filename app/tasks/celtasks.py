@@ -28,21 +28,21 @@ def iterative_simulation(self, iterations=1, uid=0):
             proc.stdin.write("{}\n".format(t.input))
             if t.input == "SHUTDOWN":
                 state = "SHUTTING DOWN"
-                
             self.update_state(state=state)
-                              
             t.input =  None
         else:
             line = proc.stdout.readline()
             if not line: break
             sys.stdout.write(line)
+            
             o = line.split(' ')
             if o[1] and o[1] == 'COMPLETED': 
                 completed += 1
                 if completed == nodes * iterations: proc.stdin.write("FINISHED\n")
             self.update_state(state='PROGRESS',
                               meta={'current': completed, 'total': iterations * nodes})
-            t.state = "PROGRESS"
+            if t: 
+                t.status = "PROGRESS"
         sess.commit()
     proc.wait()
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
@@ -51,6 +51,8 @@ def iterative_simulation(self, iterations=1, uid=0):
 @task_revoked.connect
 def simul_revoked(*args, **kwargs):
     print "I was revoked in celtask"
+
+
 
 def create_simulation(form):
     task = iterative_simulation.delay(iterations=form.iterations.data, 
