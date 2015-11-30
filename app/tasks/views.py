@@ -75,7 +75,3 @@ def cancel_simulation(task_id):
     task.update_state(state='KILLED', meta={'killed': True})
     return 'canceled'
                           
-
-def create_simulation(form):
-    task = iterative_simulation.apply_async()
-    

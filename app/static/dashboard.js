@@ -9,6 +9,7 @@ function init_task_table() {
         cache: false,
         height: 350,
         id: 'id',
+	detailView: true,
 	url: '/api/tasks?filter=uid_'+uid,
         columns: [
             {
@@ -18,13 +19,24 @@ function init_task_table() {
             }, {
                 title: 'ID',
                 field: 'id',
-                align: 'center',
+		visible: false,
+		align: 'center',
                 sortable: true
             }, {
+		title: 'Name',
+		field: 'name',
+		align: 'center',
+		sortable: true
+	    }, {
+		title: 'Started',
+		field: 'date_begun',
+		align: 'center',
+		sortable: true
+	    }, {
                 title: 'Hash',
                 field: 'task_id',
                 align: 'center',
-                sortable: true
+             
             }, {
                 title: 'Status',
                 field: 'status',
@@ -48,4 +60,27 @@ function init_task_table() {
 
 $(function() {
     init_task_table();
+    $('#table').on('expand-row.bs.table', function(e, index, row, $detail) {
+	console.log("clicked");
+	$detail.html('<div class="well inset-well"><div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">Place holder</div></div><table></table></div>').find('table').bootstrapTable({
+	    columns: [{
+		title: 'Time',
+		field: 'time',
+		align: 'center',
+		sortable: true
+	    }, {
+		title: 'Log',
+		field: 'log',
+		align: 'left'
+	    }],
+	    data: [{
+		time: '1:03',
+		log: 'it started'
+	    }, {
+		time: '1:04',
+		log: 'it went'
+	    }]
+	});
+	$('.progress-bar').text('15 of 987');
+    });
 });
