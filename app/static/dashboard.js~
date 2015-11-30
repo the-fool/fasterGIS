@@ -1,0 +1,51 @@
+function initStudentListTable() {
+    var $table=$('#table');
+    var $confirm=$('#student-list').find('.confirm');
+    var selections = [];
+
+    $('#student-list-table').bootstrapTable({
+        cache: false,
+        height: 350,
+        id: 'sid',
+
+        columns: [
+            {
+                field: 'state',
+                checkbox: true,
+                align: 'center'
+            }, {
+                title: 'SID',
+                field: 'sid',
+                align: 'center',
+                sortable: true
+            }, {
+                title: 'Name',
+                field: 'sname',
+                align: 'center',
+                sortable: true
+            }, {
+                title: 'Major',
+                field: 'major',
+                align: 'center',
+                sortable: true
+            }, {
+                title: 'Level',
+                field: 's_level',
+                align: 'center',
+                sortable: true
+            }]
+        });
+
+    $table.on('check.bs.table uncheck.bs.table ' +
+              'check-all.bs.table uncheck-all.bs.table', function () {
+                  $confirm.prop('disabled', !$table.bootstrapTable('getSelections').length);
+                  $table.data('selections', getIdSelections());
+
+              });
+
+    function getIdSelections() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row['sid'];
+        });
+    }
+}
