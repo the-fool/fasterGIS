@@ -18,7 +18,7 @@ class User(UserMixin, Base):
     password_hash = Column(String(128))
     name = Column(String(64))
 
-    tasks = relationship('Task', backref='user', 
+    tasks = relationship('Task', backref='users', 
                          cascade="all, delete, delete-orphan")
 
     @property
@@ -49,7 +49,7 @@ class User(UserMixin, Base):
 class Task(Base):
     __tablename__ = 'tasks'
     id = Column(Integer, Sequence('task_sq'), primary_key=True)
-    task_id = Column(String(765), unique=True)
+    task_id = Column(String(256), unique=True)
     status = Column(String(150), default='Pending')
     name = Column(String(64), default=None)
     input = Column(String(512), default=None)
@@ -58,6 +58,8 @@ class Task(Base):
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))
     
+    scripts = relationship('Script', backref='tasks', 
+                           cascade='all, delete, delete-orphan')
     @property
     def serializer(self):
         """Return jsonoid format"""
@@ -73,6 +75,14 @@ class Task(Base):
             'date_begun' : dump_datetime(self.date_begun)
         }
 
+class Script(Base):
+    __tablename__ = 'scripts'
+    id = Column(Integer, Sequence('script_sq'), primary_key=True)
+    task_id = Column(String(256), ForeignKey('tasks.task_id'))
+    type = Column(String(64))
+    iterations = Column(Integer, default=1)
+    
+    
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False
