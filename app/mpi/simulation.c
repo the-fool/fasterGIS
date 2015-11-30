@@ -50,7 +50,7 @@ int do_slave(int rank, int iterations) {
     MPI_Status status;
     while (1) {
       MPI_Recv(&buff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
-         
+      printf("node %d got %s\n", rank, buff);   
       if (strcmp(buff, "sigusr") == 0) {
 	kill(pid, SIGUSR1);
       }
@@ -120,7 +120,8 @@ int do_master() {
   while (1) {
     fgets(buff, MAX_BUFF, stdin);
     if ( (cptr = strchr(buff, '\n')) != NULL) *cptr = '\0';
-   
+    printf("got an input: %s\n", buff);
+    fflush(stdout);
     MPI_Send(buff, strlen(buff) + 1, MPI_CHAR, 1, 0, MPI_COMM_WORLD);
     }
 }

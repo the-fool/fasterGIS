@@ -1,4 +1,6 @@
 from .. import celery
+from ..models import Task
+from ..database import db_session as sess
 import sys
 import os
 from subprocess import Popen, PIPE, STDOUT
@@ -11,10 +13,14 @@ def foo(self):
     proc = Popen(['/usr/bin/mpirun','-n', '2', '{0}/app/mpi/simulation'.format(cwd)], stdin=PIPE,
                  stdout=PIPE, stderr=STDOUT)
     while proc.poll() is None:
-        if (task.state == 'SCALING'):
-            node_num = task.info.get('node_num')
-            proc.stdin.write('scale back to {0}'.format(node_num))
-            self.update_state(STATE='PROGRESS',
+        t = Task.query.filter(Task.task_id == self.request.id).first()
+        
+        if t and t.input:
+            sys.stdout.write("got an input:" + t.input)
+            proc.stdin.write("{}\n".format(t.input))
+            t.input =  None
+           
+            self.update_state(state='PROGRESS',
                               meta={'current': 'just scaled'})
         else:
             line = proc.stdout.readline()
@@ -22,7 +28,7 @@ def foo(self):
             
             self.update_state(state='PROGRESS',
                               meta={'current': line})
-        
+        sess.commit()
     proc.wait()
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
             'result': 'FINISHED!!'}

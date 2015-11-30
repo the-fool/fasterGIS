@@ -58,9 +58,10 @@ def run_foo():
 
 
 @tasks.route('/input/<task_id>', methods=['POST'])
-def input_foo():
-    Task.query.filter(task_id == task_id).update({"input": "check 1 2"})
-
+def input_foo(task_id):
+    Task.query.filter(Task.task_id == task_id).update({"input": "check 1 2"})
+    sess.commit()
+    return jsonify({}), 202, {'OK': 'whatever'}
 @tasks.route('/revoke_foo/<task_id>', methods=['POST'])
 def revoke_foo(task_id):
     return 'revoked'

@@ -8,7 +8,7 @@ import errno
 
 engine = create_engine(os.environ.get('DEV_DATABASE_URL'), convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
+                                         autoflush=True,
                                          bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
