@@ -81,6 +81,6 @@ $(function() {
 		log: 'it went'
 	    }]
 	});
-	$('.progress-bar').text('15 of 987');
+	$detail.find('.progress-bar').text(row['task_id']);
     });
 });

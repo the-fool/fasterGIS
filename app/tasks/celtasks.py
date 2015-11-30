@@ -6,6 +6,7 @@ import sys
 import os
 from subprocess import Popen, PIPE, STDOUT
 from celery.signals import task_revoked
+
 from datetime import datetime
 
 @celery.task(bind=True)
