@@ -5,7 +5,7 @@ function init_task_table() {
     var uid = $table.data('uid');
     var selections = [];
 
-    $('#student-list-table').bootstrapTable({
+    $table.bootstrapTable({
         cache: false,
         height: 350,
         id: 'id',
