@@ -8,9 +8,11 @@ from subprocess import Popen, PIPE, STDOUT
 from celery.signals import task_revoked
 from datetime import datetime
 
+
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0):
     nodes = 4
+    completed = 0
     tid = self.request.id
     cwd = os.getcwd()
     proc = Popen(['/usr/bin/mpirun','-n', '5', 
@@ -33,10 +35,14 @@ def iterative_simulation(self, iterations=1, uid=0):
         else:
             line = proc.stdout.readline()
             if not line: break
-
             sys.stdout.write(line)
+            o = line.split(' ')
+            if o[1] and o[1] == 'COMPLETED': 
+                completed += 1
+                if completed == nodes * iterations: proc.stdin.write("FINISHED\n")
             self.update_state(state='PROGRESS',
-                              meta={'current': line})
+                              meta={'current': completed, 'total': iterations * nodes})
+            t.state = "PROGRESS"
         sess.commit()
     proc.wait()
     return {'current': 100, 'total': 100, 'status': 'Task completed!',

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   else {
      do_slave(comm_rank, meta);
   }
-
+  fflush(stdout);
   MPI_Finalize();
 }
 
@@ -77,6 +77,11 @@ int do_slave(int rank, META meta) {
       else if (strcmp(buff, "SHUTDOWN") == 0) {
 	kill(pid, SIGUSR2);
 	wait();
+	break;
+      }
+      else if (strcmp(buff, "FINISHED") == 0) {
+	wait();
+	printf("P%d: COLLECTED CHILD\n", rank);
 	break;
       }
     }
@@ -127,10 +132,10 @@ int manage_script(int rank, META meta){
       waitpid(pid, NULL, 0);
     } else {
       waitpid(pid, NULL, 0);
-      printf("P%d: COMPLETE %d\n", rank, i);
+      printf("P%d: COMPLETED %d\n", rank, i);
     }
   }
-  printf("P%d: SHUTTING DOWN\n", rank);
+  printf("P%d: FINISHED\n", rank);
   fflush(stdout);
   exit(0);
 } 
@@ -169,23 +174,26 @@ int do_master(int comm_size) {
     
     if (strcmp(buff, "SHUTDOWN") == 0) {
       printf("Master init shutdown\n");	
-      for (i=1; i < comm_size; i++) 
-	MPI_Ssend(buff, strlen(buff) + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD);
-    
-      fflush(stdout);
+      send_all(comm_size, buff);
       break;
     } 
     else if (strcmp(buff, "PAUSE") == 0) {
-	printf("Master init pause\n");
-	for (i=1; i < comm_size; i++) 
-	  MPI_Send(buff, strlen(buff) + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD);
-	
+      printf("Master init pause\n");
+      send_all(comm_size, buff);
     }
-    else{
-      for (i=1; i<comm_size; i++) 
-	MPI_Send(buff, strlen(buff) + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD); 
+    else if (strcmp(buff, "FINISHED") == 0) {
+      printf("Master: FINISHED\n");
+      send_all(comm_size, buff);
+      break;
     }
+    else 
+      send_all(comm_size, buff);
     fflush(stdout);  
-  }
+  } // end while
+}
 
+int send_all(int comm_size, char* msg) {
+  int i = 0;
+  while (++i < comm_size) 
+    MPI_Send(msg, strlen(msg) + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD);
 }
