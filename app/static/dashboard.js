@@ -80,9 +80,10 @@ function init_task_table() {
 
 $(function() {
     init_task_table();
+    
     $('#table').on('expand-row.bs.table', function(e, index, row, $detail) {
 	console.log("clicked");
-	$detail.html('<div class="well inset-well"><div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">Place holder</div></div><table></table></div>').find('table').bootstrapTable({
+	$detail.html('<div class="well status-well"><div class="row"><div class="col-md-12"><h4 class="update-text"></h4></div></div><div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">Place holder</div></div><table></table></div>').find('table').bootstrapTable({
 	    columns: [{
 		title: 'Time',
 		field: 'time',
@@ -101,10 +102,41 @@ $(function() {
 		log: 'it went'
 	    }]
 	});
-	$detail.find('.progress-bar').text(row['task_id']);
+	var $progbar = $detail.find('.progress-bar');
+	var $progtext = $detail.find('.update-text');
+	var progress_url = '/tasks/simul_status/'+ row['task_id'];
+	update_progress(progress_url, $progbar, $progtext);
     });
     $('table').on('click-row.bs.table', function(e,row,$tr) {
         $tr.find('>td>.detail-icon').trigger('click');
     });
 
 });
+
+function update_progress(url, $pbar, $uptext) {
+    $.getJSON(url, function(data) {
+	if (isNaN(data['current'])) { 
+	    percent = 0;
+	    $pbar.text("Pending . . . ");
+	    $uptext.text("Task is pending");
+	} else {
+	    percent = parseInt(data['current'] * 100 / data['total']);
+	    $pbar.css('width', percent+'%').attr('aria-valuenow', percent);
+	    $uptext.text(data['current'] + " out of " + data['total']);
+	    $pbar.text(percent + "%");
+	}
+	if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+            if ('result' in data) {
+                $pbar.text('Result: ' + data['result']);
+            }
+            else {
+		$(status_div.childNodes[3]).text('Result: ' + data['state']);
+            }
+        }
+        else {
+            setTimeout(function() {
+                update_progress(url, $pbar, $uptext);
+            }, 2000);
+        }
+    });
+}

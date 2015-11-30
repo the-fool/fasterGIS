@@ -45,8 +45,8 @@ def iterative_simulation(self, iterations=1, uid=0):
                 t.status = "PROGRESS"
         sess.commit()
     proc.wait()
-    return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': 'FINISHED!!'}
+    return {'current': completed, 'total': iterations * nodes, 'status': 'Task completed!',
+            'result': 'yes'}
 
 @task_revoked.connect
 def simul_revoked(*args, **kwargs):
@@ -66,4 +66,4 @@ def create_simulation(form):
                     iterations=form.iterations.data, 
                     type=form.simul_type.data))
     sess.commit()
-
+    
