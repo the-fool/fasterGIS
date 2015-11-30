@@ -110,7 +110,7 @@ int manage_script(int rank, META meta){
   while (!DORMANT && !SHUTDOWN && (i++ < meta.iters) ) {
     printf("P%d: BEGIN %d\n", rank, i);
     // generate unique fname
-    sprintf(fname, "%d_%s_%d_%d", meta.uid, meta.tid, rank, i);
+    sprintf(fname, "%d_%.*s_%d_%d", meta.uid, (int)strlen(meta.tid) - 1, meta.tid, rank, i);
     pid = exec_script(pfd, fname); 
     
     // echo output of script
