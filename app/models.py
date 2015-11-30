@@ -56,7 +56,20 @@ class Task(Base):
     date_done = Column(DateTime)
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))
-
+    
+    @property
+    def serializer(self):
+        """Return jsonoid format"""
+        return {
+            'id' : self.id,
+            'task_id' : self.task_id,
+            'status' : self.status,
+            'result' : self.result,
+            'input' : self.input,
+            'traceback' : self.traceback,
+            'user_id' : self.user_id,
+            'date_done' : dump_datetime(self.date_done)
+        }
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
@@ -71,3 +84,9 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def dump_datetime(value):
+    """Deserialize datetime object into string form for JSON processing."""
+    if value is None:
+        return None
+    return [value.strftime("%Y-%m-%d"), value.strftime("%H:%M:%S")]
