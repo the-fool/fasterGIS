@@ -10,14 +10,15 @@ from datetime import datetime
 
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0):
+    nodes = 4
     tid = self.request.id
     cwd = os.getcwd()
-    proc = Popen(['/usr/bin/mpirun','-n', '2', 
+    proc = Popen(['/usr/bin/mpirun','-n', '5', 
                   '{0}/app/mpi/simulation'.format(cwd),
                   str(uid), str(tid), str(iterations)], 
                  stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 
-    while proc.poll() is None:
+    while True:
         t = Task.query.filter(Task.task_id == tid).first()
         
         if t and t.input:
@@ -25,12 +26,14 @@ def iterative_simulation(self, iterations=1, uid=0):
             proc.stdin.write("{}\n".format(t.input))
             if t.input == "SHUTDOWN":
                 state = "SHUTTING DOWN"
-                meta = self.info
-            self.update_state(state=state,
-                              meta=meta)
+                
+            self.update_state(state=state)
+                              
             t.input =  None
         else:
             line = proc.stdout.readline()
+            if not line: break
+
             sys.stdout.write(line)
             self.update_state(state='PROGRESS',
                               meta={'current': line})
@@ -44,7 +47,7 @@ def simul_revoked(*args, **kwargs):
     print "I was revoked in celtask"
 
 def create_simulation(form):
-    task = iterative_simulation.apply_async(iterations=form.iterations.data, 
+    task = iterative_simulation.delay(iterations=form.iterations.data, 
                                             uid=current_user.get_id())
     sess.add(Task(task_id=task.id, 
                   status=task.status, 

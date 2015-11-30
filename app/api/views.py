@@ -23,6 +23,6 @@ def shutdown():
        t.input = "SHUTDOWN"
        t.status = "Shutting Down"
        sess.commit()
-       print "shutdown ", t.name
+       print "Shutdown ", t.name
     return jsonify({"Success": "very"}), 202 
     
