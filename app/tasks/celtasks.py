@@ -6,7 +6,6 @@ import sys
 import os
 from subprocess import Popen, PIPE, STDOUT
 from celery.signals import task_revoked
-
 from datetime import datetime
 
 @celery.task(bind=True)
@@ -17,15 +16,19 @@ def iterative_simulation(self, iterations=1, uid=0):
                   '{0}/app/mpi/simulation'.format(cwd),
                   str(uid), str(tid), str(iterations)], 
                  stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+
     while proc.poll() is None:
         t = Task.query.filter(Task.task_id == tid).first()
         
         if t and t.input:
-            sys.stdout.write("got an input:" + t.input)
+            sys.stdout.write("Echo to MPI:" + t.input)
             proc.stdin.write("{}\n".format(t.input))
+            if t.input == "SHUTDOWN":
+                state = "SHUTTING DOWN"
+                meta = self.info
+            self.update_state(state=state,
+                              meta=meta)
             t.input =  None
-            self.update_state(state='PROGRESS',
-                              meta={'current': 'just scaled'})
         else:
             line = proc.stdout.readline()
             sys.stdout.write(line)

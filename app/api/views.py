@@ -1,4 +1,4 @@
-from flask import request, Response
+from flask import request, Response, jsonify
 from flask.ext.login import login_required,  current_user
 from . import api
 from ..database import db_session as sess
@@ -15,3 +15,14 @@ def tasks():
         l = [q.serializer for q in Task.query.all()]
     return Response(json.dumps(l), content_type='application/json', 
                     mimetype='application/json')
+
+@api.route('/shutdown', methods=['POST'])
+def shutdown():
+    for x in request.get_json()['tid']:
+       t =  Task.query.filter(Task.task_id == x).first()
+       t.input = "SHUTDOWN"
+       t.status = "Shutting Down"
+       sess.commit()
+       print "shutdown ", t.name
+    return jsonify({"Success": "very"}), 202 
+    

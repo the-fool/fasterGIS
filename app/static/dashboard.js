@@ -8,7 +8,7 @@ function init_task_table() {
     $table.bootstrapTable({
         cache: false,
         height: 350,
-        id: 'id',
+        id: 'task_id',
 	detailView: true,
 	url: '/api/tasks?filter=uid_'+uid,
         columns: [
@@ -46,14 +46,34 @@ function init_task_table() {
         });
 
     $table.on('check.bs.table uncheck.bs.table ' +
-              'check-all.bs.table uncheck-all.bs.table', function () {
-                  $add.prop('disabled', !$table.bootstrapTable('getSelections').length);
-                  $table.data('selections', getIdSelections());
-              });
+         'check-all.bs.table uncheck-all.bs.table', function () {
+             $add.prop('disabled', 
+		       $table.bootstrapTable('getSelections').length);
+             $stop.prop('disabled', 
+			 !$table.bootstrapTable('getSelections').length);
+	     $table.data('selections', getIdSelections());
+         });
+    
+    $stop.click(function() {
+	var data = {'tid': getIdSelections()};
+	$.ajax({
+	    url: '/api/shutdown',
+	    contentType: 'application/json',
+	    method: 'POST',
+	    data: JSON.stringify(data),
+	    success: function(d,s) {
+		console.log('data:' + d);
+		console.log('status:' + s);
+	    },
+	    error: function() {
+		alert("error");
+	    }	      
+	});
+    });
 
     function getIdSelections() {
         return $.map($table.bootstrapTable('getSelections'), function (row) {
-            return row['id'];
+            return row['task_id'];
         });
     }
 }
