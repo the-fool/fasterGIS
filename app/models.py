@@ -52,6 +52,7 @@ class Task(Base):
     task_id = Column(String(765), unique=True)
     status = Column(String(150))
     result = Column(String(200))
+    input = Column(String(512), default=None)
     date_done = Column(DateTime)
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))

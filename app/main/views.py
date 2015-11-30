@@ -25,7 +25,3 @@ def user(username):
         return render_template('public_user.html', user=user)
     else:
         return abort(404)
-
-@celery.task
-def can():
-    print "you see this, celery?"

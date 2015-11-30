@@ -1,8 +1,11 @@
 from flask import jsonify, url_for
+from flask.ext.login import current_user
 from . import tasks
 from .celtasks import foo
 from time import sleep
 from .. import celery
+from ..models import Task
+from ..database import db_session as sess
 from celery.task.control import revoke
 from celery.signals import task_revoked
 
@@ -44,12 +47,19 @@ def foostatus(task_id):
 @tasks.route('/foo', methods=['POST'])
 def run_foo():
     task = foo.apply_async()
+    sess.add(Task(task_id=task.id, user_id=current_user.get_id()))
+    sess.commit()
     return jsonify({}), 202, {'Progress': url_for('.foostatus',
                                                   task_id=task.id),
-                              'Scale': url_for('.scale_foo',
+                              'Input': url_for('.input_foo',
                                                task_id=task.id),
                               'Revoke': url_for('.revoke_foo',
                                                 task_id=task.id)  }
+
+
+@tasks.route('/input/<task_id>', methods=['POST'])
+def input_foo():
+    Task.query.filter(task_id == task_id).update({"input": "check 1 2"})
 
 @tasks.route('/revoke_foo/<task_id>', methods=['POST'])
 def revoke_foo(task_id):

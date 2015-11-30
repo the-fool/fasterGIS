@@ -6,6 +6,7 @@ function start_task() {
         url: '/tasks/foo',
         success: function(data, status, request) {
             status_url = request.getResponseHeader('Progress');            
+	
 	    update_progress(status_url, div[0]);
         },
         error: function() {
@@ -32,7 +33,8 @@ function update_progress(status_url, status_div) {
         }
     });
 }
-
+function signal_foo() {
+}
 $(function() {
     $('#start-bg-job').click(start_task);
 });

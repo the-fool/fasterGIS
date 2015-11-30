@@ -18,10 +18,10 @@ def foo(self):
                               meta={'current': 'just scaled'})
         else:
             line = proc.stdout.readline()
-            sys.stdout.write("Hey!"+line)
+            sys.stdout.write(line)
             
             self.update_state(state='PROGRESS',
-                              meta={'current': str(line)})
+                              meta={'current': line})
         
     proc.wait()
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
