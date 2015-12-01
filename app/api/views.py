@@ -1,4 +1,4 @@
-from flask import request, Response, jsonify, send_from_directory
+from flask import after_this_request, request, Response, jsonify, send_from_directory
 from flask.ext.login import login_required,  current_user
 from . import api
 from ..database import db_session as sess
@@ -61,9 +61,11 @@ def results(task_id):
 
 @api.route('/download/<fname>')
 def download(fname):
-    print fname
-    return send_from_directory(os.path.join(os.getcwd(), 
-                                            'app/users/{0}/results/'.format(current_user.id)), 
-                               fname+'.zip', as_attachment=True) 
+    path = os.path.join(os.getcwd(),'app/users/{0}/results/'.format(current_user.id))
+    @after_this_request
+    def remove_file(response):
+        os.remove(os.path.join(path, fname + '.zip'))
+        return response
+    return send_from_directory(path, fname+'.zip', as_attachment=True) 
 
 
