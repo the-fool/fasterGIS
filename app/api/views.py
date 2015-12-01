@@ -26,3 +26,13 @@ def shutdown():
        print "Shutdown ", t.name
     return jsonify({"Success": "very"}), 202 
     
+@api.route('/logs/<task_id>')
+def log(task_id):
+    path = Task.query.filter(Task.task_id == task_id).first().log
+    print path
+    with open(path, 'r') as f:
+        l = [{'time': x.split(' ')[0].rstrip(']').lstrip('['), 'text': x.split(' ',1)[1].rstrip('\n')} for x in f]
+       
+    sess.commit()
+    return Response(json.dumps(l), content_type='application/json', 
+                    mimetype='application/json')
