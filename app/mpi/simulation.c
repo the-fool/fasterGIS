@@ -116,7 +116,7 @@ int manage_script(int rank, META meta){
     // echo output of script
     while (!DORMANT && !SHUTDOWN && (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) {
       buff[nbytes] = '\0';
-      printf("P%d: LOG: %s", rank, buff);
+      printf("P%d: SUBPROC: %s", rank, buff);
     } 
 
     close(pfd[0]);

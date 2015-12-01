@@ -11,15 +11,24 @@ from datetime import datetime
 class Logger():
     flog = None
     def __init__(self, uid=0, tid='x'):
-        udir = '/var/www/fastGIS/app/users/{0}/logs'.format(uid)
-        self.flog = open(os.path.join(uid,tid), 'w+')
-    
+        udir = '{0}/app/users/{1}/logs'.format(os.getcwd(), uid)
+        self.flog = open(os.path.join(udir,tid), 'w+')
+        self.uid = uid
+        self.tid = tid
+
+    def log(self, line=' '):
+        if line[0] == 'P':
+            self.flog.write('[{0}] {1}'.format(datetime.now().isoformat(), line))
+
+    def close(self):
+        self.flog.close()
 
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0):
     nodes = 4
     completed = 0
     tid = self.request.id
+    logger = Logger(uid=uid, tid=tid)
     cwd = os.getcwd()
     proc = Popen(['/usr/bin/mpirun','-n', '5', 
                   '{0}/app/mpi/simulation'.format(cwd),
@@ -40,7 +49,10 @@ def iterative_simulation(self, iterations=1, uid=0):
         else:
             line = proc.stdout.readline()
             if not line: break
+
             sys.stdout.write(line)
+            logger.log(line=line)
+
             o = line.split(' ')
             if state not in ("PAUSED", "SHUTTING DOWN") and len(o) > 1:
                 if o[1] == 'BEGIN':
@@ -63,6 +75,8 @@ def iterative_simulation(self, iterations=1, uid=0):
                           meta={'current': completed, 'total': iterations * nodes})
         t.status = "CANCELLED"
         sess.commit()
+    
+    logger.close()
     return {'current': completed, 'total': iterations * nodes, 'status': 'Finished',
             'result': 'yes'}
 
