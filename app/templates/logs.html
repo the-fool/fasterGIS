@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css">
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+{% endblock %}
+
+{% block page_content %}
+
+<div class="page-header">
+  <div class="row text-center">
+    <h1>Welcome {{ user.username.title() }}</h1>
+  </div>
+</div>
+
+<div class="well">
+  <h2>Current Tasks</h2>
+  <hr>
+  <div id="toolbar">
+    <button id="add-task"
+            data-toggle="modal" data-target="#add-task-modal"
+            class="btn btn-success">
+      <i class="glyphicon glyphicon-plus"></i> Create New Task
+    </button>
+    
+    <button id="stop-task" class="btn btn-danger" disabled>
+      <i class="glyphicon glyphicon-remove"></i> Halt Task
+    </button>
+  </div>
+  
+  <table id="table"
+	 class="custom-hover"
+	 data-uid="{{user.id}}"
+         data-toolbar="#toolbar"
+         data-search="true"
+         data-show-refresh="true"
+         data-show-toggle="true"
+         data-show-columns="true"
+         data-locale="en-US">
+  </table>
+</div>
+
+<div id="add-task-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Task</h4>
+      </div>
+      <div class="modal-body">
+       {{ wtf.quick_form(form) }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
+<script src="{{ url_for('static', filename='bootstrap-table-editable.js')}}"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+<script src="{{ url_for('static', filename='dashboard.js')}}"></script>
+{% endblock %}

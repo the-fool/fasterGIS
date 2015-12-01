@@ -30,3 +30,8 @@ def user(username):
         return render_template('public_user.html', user=user)
     else:
         return abort(404)
+
+@main.route('/user/logs/<task_id>')
+@login_required
+def logs(task_id):
+    return render_template('logs.html')
