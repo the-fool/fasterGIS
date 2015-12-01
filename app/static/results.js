@@ -27,7 +27,23 @@ function init_table() {
                          !$table.bootstrapTable('getSelections').length);
              $table.data('selections', getIdSelections());
          });
-    
+    $dl.click(function() {
+	console.log(getIdSelections());
+	var data = {'path': getIdSelections()};
+	$.ajax({
+	    url: '/api/zip_results',
+	    contentType: 'application/json',
+	    method: 'POST',
+	    data: JSON.stringify(data),
+	    success: function(d,s) {
+		console.log(d);
+		window.location.href = '/api/download/' + d['fname'];
+	    },
+	    error: function() {
+		alert("unexpected error");
+	    }
+	});
+    });
     function getIdSelections() {
         return $.map($table.bootstrapTable('getSelections'), function (row) {
             return row['path'];

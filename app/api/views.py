@@ -1,9 +1,13 @@
-from flask import request, Response, jsonify
+from flask import request, Response, jsonify, send_from_directory
 from flask.ext.login import login_required,  current_user
 from . import api
 from ..database import db_session as sess
 from ..models import User, Task, Result
 import json
+import zipfile
+from datetime import datetime
+import os
+
 
 @api.route('/tasks')
 def tasks():
@@ -25,6 +29,18 @@ def shutdown():
        sess.commit()
        print "Shutdown ", t.name
     return jsonify({"Success": "very"}), 202 
+
+
+@api.route('/zip_results', methods=['POST'])
+def zip_results():
+    l = request.get_json()['path']
+    fname = os.path.join(os.getcwd(), 'app/users/{0}/results/{1}_{0}'
+                         .format(current_user.id, datetime.now().isoformat('_')))  
+    Zip = zipfile.ZipFile(fname + '.zip', 'w')
+    for x in l:
+        Zip.write(x, os.path.basename(x))
+    fname = fname.split('results/')[1]  
+    return jsonify({"fname": fname}), 202 
     
 @api.route('/logs/<task_id>')
 def log(task_id):
@@ -42,3 +58,12 @@ def results(task_id):
     l = [q.serializer for q in  Result.query.filter(Result.task_id == task_id).all()]
     return Response(json.dumps(l), content_type='application/json', 
                     mimetype='application/json')
+
+@api.route('/download/<fname>')
+def download(fname):
+    print fname
+    return send_from_directory(os.path.join(os.getcwd(), 
+                                            'app/users/{0}/results/'.format(current_user.id)), 
+                               fname+'.zip', as_attachment=True) 
+
+
