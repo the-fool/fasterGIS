@@ -163,7 +163,7 @@ pid_t exec_script(int *pfd, char *fname) {
     dup2(pfd[1], STDOUT_FILENO);
     close(pfd[0]); 
     close(pfd[1]);
-    execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/app/scripts/save.py", fname, (char*)0 );
+    execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/app/scripts/sgs.py", fname, (char*)0 );
     die("execl");
   }
   close(pfd[1]);
