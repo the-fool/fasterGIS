@@ -9,7 +9,7 @@ function init_task_table() {
         cache: false,
 	showExport: true,
 	exportTypes: ['json','xml','csv','txt'],
-	height: 350,
+//	height: 350,
         id: 'task_id',
 	detailView: true,
 	url: '/api/tasks?filter=uid_'+uid,
@@ -84,8 +84,7 @@ $(function() {
     init_task_table();
     
     $('#table').on('expand-row.bs.table', function(e, index, row, $detail) {
-	console.log("clicked");
-	$detail.html('<div class="well status-well"><div class="row"><div class="col-md-12"><h4 class="update-text"></h4></div></div><div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">Waiting . . .</div></div><div class="row text-center"><button class="btn btn-large btn-info logs">Logs</button>&nbsp &nbsp <button class="btn btn-large btn-success results">Results</button></div></div></div>')
+	$detail.html('<div class="well status-well"><div class="row"><div class="col-md-12"><h4 class="update-text"></h4></div></div><div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">Waiting . . .</div></div><div class="row text-center"><button class="btn btn-large btn-info logs"><i class="glyphicon glyphicon-book"></i> &nbsp Logs</button>&nbsp &nbsp <button class="btn btn-large btn-success results"><i class="glyphicon glyphicon-download-alt"></i> &nbsp Results</button></div></div></div>')
 
 	var $progbar = $detail.find('.progress-bar');
 	var $progtext = $detail.find('.update-text');

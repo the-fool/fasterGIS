@@ -77,8 +77,8 @@ def read_data( fn ):
 clstr = read_data( '/var/www/fastGIS/app/scripts/cluster.dat' )
 
 # we want 30 steps between 0 and 50, in both dimensions
-nx = 50 ; xsteps = 30
-ny = 50 ; ysteps = 30
+nx = 50 ; xsteps = 20
+ny = 50 ; ysteps = 20
 xrng = np.linspace(0,nx,num=xsteps)
 yrng = np.linspace(0,ny,num=ysteps)
 
@@ -133,7 +133,9 @@ t1 = time.time()
 print (t1-t0)/60.0
 
 with open('plot.pkl', 'wb') as out:
-    pickle.dump(M, output, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(M, out, pickle.HIGHEST_PROTOCOL)
+
+print "Pickled"
 
 import matplotlib
 matplotlib.use('Agg')
