@@ -6,6 +6,7 @@ import shutil
 import datetime
 import errno
 
+
 engine = create_engine(os.environ.get('DEV_DATABASE_URL'), convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=True,

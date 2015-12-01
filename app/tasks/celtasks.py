@@ -1,6 +1,6 @@
 from .. import celery
 from flask.ext.login import current_user
-from ..models import Task, Script
+from ..models import Task, Script, Result
 from ..database import db_session as sess
 import sys
 import os
@@ -23,12 +23,26 @@ class Logger():
     def close(self):
         self.flog.close()
 
+class Persister():
+    udir = None
+    def __init__(self, uid=0, tid='x'):
+        self.udir = '{0}/app/users/{1}/results'.format(os.getcwd(), uid)
+        self.uid = uid
+        self.tid = tid
+    
+    def persist(self, fname):
+        path = os.path.join(self.udir, fname)
+        sess.add(Result(path=path, task_id=self.tid))
+        sess.commit()
+        
+
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0):
     nodes = 4
     completed = 0
     tid = self.request.id
     logger = Logger(uid=uid, tid=tid)
+    persister = Persister(uid=uid, tid=tid)
     cwd = os.getcwd()
     proc = Popen(['/usr/bin/mpirun','-n', '5', 
                   '{0}/app/mpi/simulation'.format(cwd),
@@ -59,6 +73,7 @@ def iterative_simulation(self, iterations=1, uid=0):
                     state = 'PROGRESS'
                 elif o[1] == 'COMPLETED':
                     completed += 1
+                    persister.persist(o[2].rstrip('\n'))
                     state = 'PROGRESS'
                     if completed == nodes * iterations: 
                         proc.stdin.write("FINISHED\n")
@@ -74,9 +89,11 @@ def iterative_simulation(self, iterations=1, uid=0):
         self.update_state(state="CANCELLED", 
                           meta={'current': completed, 'total': iterations * nodes})
         t.status = "CANCELLED"
-        sess.commit()
+      
     
     logger.close()
+    t.log = '{0}/app/users/{1}/logs/{2}'.format(cwd, uid, tid) 
+    sess.commit()
     return {'current': completed, 'total': iterations * nodes, 'status': 'Finished',
             'result': 'yes'}
 

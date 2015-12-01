@@ -132,7 +132,7 @@ int manage_script(int rank, META meta){
       waitpid(pid, NULL, 0);
     } else {
       waitpid(pid, NULL, 0);
-      printf("P%d: COMPLETED %d\n", rank, i);
+      printf("P%d: COMPLETED %s\n", rank, fname);
     }
   }
   printf("P%d: FINISHED\n", rank);

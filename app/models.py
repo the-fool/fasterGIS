@@ -6,7 +6,7 @@ from flask import current_app, request
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from database import Base
-from sqlalchemy import Numeric, DateTime, Column, ForeignKey, Integer, String, Table, text, Sequence
+from sqlalchemy import LargeBinary, Numeric, DateTime, Column, ForeignKey, Integer, String, Table, text, Sequence
 from sqlalchemy.orm import relationship, backref
 
 
@@ -58,9 +58,13 @@ class Task(Base):
     date_done = Column(DateTime)
     traceback = Column(String(700))
     user_id = Column(Integer, ForeignKey('users.id'))
-    
-    scripts = relationship('Script', backref='tasks', 
+    log = Column(String(256), default=None)
+    scripts = relationship('Script', backref='tasks.task_id', 
                            cascade='all, delete, delete-orphan')
+    
+    results = relationship('Result', backref='tasks.task_id', 
+                           cascade='all, delete, delete-orphan')
+  
     @property
     def serializer(self):
         """Return jsonoid format"""
@@ -83,6 +87,11 @@ class Script(Base):
     type = Column(String(64))
     iterations = Column(Integer, default=1)
     
+class Result(Base):
+    __tablename__ = 'results'
+    path = Column(String(256), primary_key=True)
+    task_id = Column(String(256), ForeignKey('tasks.task_id'))
+   
     
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
