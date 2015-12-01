@@ -34,4 +34,5 @@ def user(username):
 @main.route('/user/logs/<task_id>')
 @login_required
 def logs(task_id):
-    return render_template('logs.html', tid=task_id)
+    t = Task.query.filter(Task.task_id == task_id).first()
+    return render_template('logs.html', t=t)

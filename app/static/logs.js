@@ -2,6 +2,8 @@ function init_table() {
     var $table = $('#table');
     $table.bootstrapTable({
 	cache: false,
+	showExport: true,
+        exportTypes: ['json','xml','csv','txt'],
 	columns: [
 	    {
 		title: 'Time',

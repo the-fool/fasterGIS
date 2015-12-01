@@ -74,7 +74,7 @@ def read_data( fn ):
     return df
  
 
-clstr = read_data( 'cluster.dat' )
+clstr = read_data( '/var/www/fastGIS/app/scripts/cluster.dat' )
 
 # we want 30 steps between 0 and 50, in both dimensions
 nx = 50 ; xsteps = 30

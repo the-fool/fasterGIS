@@ -7,7 +7,9 @@ function init_task_table() {
 
     $table.bootstrapTable({
         cache: false,
-        height: 350,
+	showExport: true,
+	exportTypes: ['json','xml','csv','txt'],
+	height: 350,
         id: 'task_id',
 	detailView: true,
 	url: '/api/tasks?filter=uid_'+uid,
