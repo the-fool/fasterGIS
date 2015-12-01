@@ -42,6 +42,7 @@ def simul_status(task_id):
         response = {
             'state': task.state,
             'current': 1,
+            'total': task.info.get('total',0),
             'status': str(task.info),  # this is the exception raised
         }
     return jsonify(response)

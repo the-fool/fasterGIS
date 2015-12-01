@@ -40,6 +40,7 @@ class User(UserMixin, Base):
         assert not os.path.exists(user_dir)
         try:
             os.makedirs('{0}/data'.format(user_dir))
+            os.makedirs('{0}/logs'.format(user_dir))
             os.makedirs('{0}/results'.format(user_dir))
             os.makedirs('{0}/scripts'.format(user_dir))
         except OSError as e:

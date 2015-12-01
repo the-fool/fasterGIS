@@ -127,10 +127,11 @@ function update_progress(url, $pbar, $uptext) {
 	}
 	if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
             if ('result' in data) {
-                $pbar.text('Result: ' + data['result']);
-            }
+                $uptext.text('Result: ' + data['result']);
+		$pbar.text('Complete');
+	    }
             else {
-		$(status_div.childNodes[3]).text('Result: ' + data['state']);
+		$uptext.text('Result: ' + data['state']);
             }
         }
         else {
