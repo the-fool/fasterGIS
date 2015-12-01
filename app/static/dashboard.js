@@ -94,6 +94,9 @@ $(function() {
 	$detail.find('.logs').click(function() {
 	    location.href = "logs/" + row['task_id'];
 	});
+	$detail.find('.results').click(function() {
+	    location.href = "results/" + row['task_id'];
+	});
     });
     $('table').on('click-row.bs.table', function(e,row,$tr) {
         $tr.find('>td>.detail-icon').trigger('click');

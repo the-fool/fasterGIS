@@ -11,7 +11,7 @@
 
 <div class="page-header">
   <div class="row text-center">
-    <h1>Logs for '{{t.name}}'</h1>
+    <h1>Results for '{{t.name}}'</h1>
     <h3>{{t.task_id}}</h3>
   </div>
    <a href="{{url_for('.user', username=current_user.username)}}">Back</a>
@@ -21,12 +21,19 @@
 </div>
 
 <div class="well">
+<div id="toolbar">
+    <button id="download"
+            class="btn btn-success" disabled>
+      <i class="glyphicon glyphicon-download"></i> Download
+    </button>
+  </div>
+
   <table id="table"
-	 data-url="/api/logs/{{t.task_id}}"
+	 data-url="/api/results/{{t.task_id}}"
 	 class="table-striped"
+	 data-toolbar="#toolbar"
          data-search="true"
          data-show-refresh="true"
-         data-show-columns="true"
          data-locale="en-US">
   </table>
 </div>
@@ -39,5 +46,5 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 <script src="{{ url_for('static', filename='export-plugin.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap-table-export.js') }}"></script>
-<script src="{{ url_for('static', filename='logs.js')}}"></script>
+<script src="{{ url_for('static', filename='results.js')}}"></script>
 {% endblock %}

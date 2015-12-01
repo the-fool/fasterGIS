@@ -32,7 +32,7 @@ class Persister():
     
     def persist(self, fname):
         path = os.path.join(self.udir, fname)
-        sess.add(Result(path=path, task_id=self.tid))
+        sess.add(Result(path=path, name=fname, task_id=self.tid))
         sess.commit()
         
 

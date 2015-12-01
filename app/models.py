@@ -69,14 +69,14 @@ class Task(Base):
     def serializer(self):
         """Return jsonoid format"""
         return {
-            'id' : self.id,
-            'task_id' : self.task_id,
-            'status' : self.status,
-            'name' : self.name,
-            'input' : self.input,
-            'traceback' : self.traceback,
-            'user_id' : self.user_id,
-            'date_done' : dump_datetime(self.date_done),
+            'id'         : self.id,
+            'task_id'    : self.task_id,
+            'status'     : self.status,
+            'name'       : self.name,
+            'input'      : self.input,
+            'traceback'  : self.traceback,
+            'user_id'    : self.user_id,
+            'date_done'  : dump_datetime(self.date_done),
             'date_begun' : dump_datetime(self.date_begun)
         }
 
@@ -91,8 +91,16 @@ class Result(Base):
     __tablename__ = 'results'
     path = Column(String(256), primary_key=True)
     task_id = Column(String(256), ForeignKey('tasks.task_id'))
-   
+    name = Column(String(128), unique=True)
     
+    @property
+    def serializer(self):
+        return {
+            'path'    : self.path,
+            'task_id' : self.task_id,
+            'name'    : self.name
+        }
+
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False

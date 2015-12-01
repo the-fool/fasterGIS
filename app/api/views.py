@@ -2,7 +2,7 @@ from flask import request, Response, jsonify
 from flask.ext.login import login_required,  current_user
 from . import api
 from ..database import db_session as sess
-from ..models import User, Task
+from ..models import User, Task, Result
 import json
 
 @api.route('/tasks')
@@ -34,5 +34,11 @@ def log(task_id):
         l = [{'time': x.split(' ')[0].rstrip(']').lstrip('['), 'text': x.split(' ',1)[1].rstrip('\n')} for x in f]
        
     sess.commit()
+    return Response(json.dumps(l), content_type='application/json', 
+                    mimetype='application/json')
+
+@api.route('/results/<task_id>')
+def results(task_id):
+    l = [q.serializer for q in  Result.query.filter(Result.task_id == task_id).all()]
     return Response(json.dumps(l), content_type='application/json', 
                     mimetype='application/json')

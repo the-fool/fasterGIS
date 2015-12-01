@@ -82,8 +82,8 @@ def read_data( fn ):
 clstr = read_data( '/var/www/fastGIS/app/scripts/cluster.dat' )
 
 # we want 30 steps between 0 and 50, in both dimensions
-nx = 50 ; xsteps = 15
-ny = 50 ; ysteps = 15
+nx = 50 ; xsteps = 10
+ny = 50 ; ysteps = 10
 xrng = np.linspace(0,nx,num=xsteps)
 yrng = np.linspace(0,ny,num=ysteps)
 
