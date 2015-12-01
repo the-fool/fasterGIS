@@ -38,6 +38,7 @@ def zip_results():
                          .format(current_user.id, datetime.now().isoformat('_')))  
     Zip = zipfile.ZipFile(fname + '.zip', 'w')
     for x in l:
+        x = '.'.join([x, 'pkl'])
         Zip.write(x, os.path.basename(x))
     fname = fname.split('results/')[1]  
     return jsonify({"fname": fname}), 202 
