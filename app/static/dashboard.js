@@ -125,10 +125,20 @@ function update_progress(url, $pbar, $uptext) {
 	    $uptext.text(data['current'] + " out of " + data['total']);
 	    $pbar.text(percent + "%");
 	}
+	console.log(percent);
 	if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-            if ('result' in data) {
-                $uptext.text('Result: ' + data['result']);
-		$pbar.text('Complete');
+            console.log(data['status']);
+	    if ('result' in data) {
+                $uptext.text('Result: ' + data['status'] + ' at ' + 
+			     data['current'] + ' out of ' + data['total'] +
+			     ' simulations.');
+		$pbar.css('width', percent+'%');
+		$pbar.text(percent+'%');
+		if (data['status']=='CANCELLED') {
+		    $pbar.addClass('progress-bar-danger'); 
+		} else if (data['status']=='FINISHED') {
+		    $pbar.addClass('progress-bar-success');
+		}
 	    }
             else {
 		$uptext.text('Result: ' + data['state']);

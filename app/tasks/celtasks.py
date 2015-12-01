@@ -86,7 +86,8 @@ def iterative_simulation(self, iterations=1, uid=0):
         sess.commit()
     proc.wait()
     if state == "SHUTTING DOWN":
-        self.update_state(state="CANCELLED", 
+        state = "CANCELLED"
+        self.update_state(state=state, 
                           meta={'current': completed, 'total': iterations * nodes})
         t.status = "CANCELLED"
       
@@ -94,8 +95,8 @@ def iterative_simulation(self, iterations=1, uid=0):
     logger.close()
     t.log = '{0}/app/users/{1}/logs/{2}'.format(cwd, uid, tid) 
     sess.commit()
-    return {'current': completed, 'total': iterations * nodes, 'status': 'Finished',
-            'result': 'yes'}
+    return {'current': completed, 'total': iterations * nodes, 'status': state,
+            'result': state}
 
 @task_revoked.connect
 def simul_revoked(*args, **kwargs):
