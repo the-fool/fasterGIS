@@ -30,10 +30,18 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
+  
   META meta;
   meta.uid = atoi(argv[1]);
   strncpy(meta.tid, argv[2], strlen(argv[2]));
-  meta.iters = atoi(argv[3]);
+  meta.iters = atoi(argv[3]) / comm_size;
+
+  // divy the remaining iterations
+  int i = 1;
+  for (; i <= (atoi(argv[3]) % (comm_size - 1)); i++) {
+    if (comm_rank == i)
+      meta.iters++;
+  }
 
   if (comm_rank == 0) {
     do_master(comm_size);

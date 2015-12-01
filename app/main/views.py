@@ -1,4 +1,5 @@
-from flask import render_template, redirect, url_for, abort, flash, jsonify, request
+from flask import render_template, redirect, url_for, abort, flash, jsonify, request,\
+send_from_directory
 from flask.ext.login import login_required, current_user
 from . import main
 from .forms import AddTaskForm
@@ -36,3 +37,10 @@ def user(username):
 def logs(task_id):
     t = Task.query.filter(Task.task_id == task_id).first()
     return render_template('logs.html', t=t)
+
+@main.route('/user/results/<task_id>')
+@login_required
+def results(task_id):
+    t = Task.query.filter(Task.task_id == task_id).first()
+    return render_template('results.html', t=t)
+    #return send_from_directory('/var/www/fastGIS/', 'foo.png', as_attachment=False)

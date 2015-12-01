@@ -1,3 +1,7 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 import pickle
 import time
 import numpy as np
@@ -5,6 +9,7 @@ import scipy.stats
 import scipy.optimize
 import scipy.interpolate
 import pandas
+
 from pylab import *
 from geostats import krige as k 
 from geostats import kriging
@@ -77,8 +82,8 @@ def read_data( fn ):
 clstr = read_data( '/var/www/fastGIS/app/scripts/cluster.dat' )
 
 # we want 30 steps between 0 and 50, in both dimensions
-nx = 50 ; xsteps = 20
-ny = 50 ; ysteps = 20
+nx = 50 ; xsteps = 15
+ny = 50 ; ysteps = 15
 xrng = np.linspace(0,nx,num=xsteps)
 yrng = np.linspace(0,ny,num=ysteps)
 
@@ -137,9 +142,6 @@ with open('plot.pkl', 'wb') as out:
 
 print "Pickled"
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 cdict = {'red':   ((0.0, 1.0, 1.0),
                    (0.5, 225/255., 225/255. ),
                    (0.75, 0.141, 0.141 ),
