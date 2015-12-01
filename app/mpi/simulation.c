@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   META meta;
   meta.uid = atoi(argv[1]);
   strncpy(meta.tid, argv[2], strlen(argv[2]));
-  meta.iters = atoi(argv[3]) / comm_size;
+  meta.iters = atoi(argv[3]) / (comm_size - 1);
 
   // divy the remaining iterations
   int i = 1;

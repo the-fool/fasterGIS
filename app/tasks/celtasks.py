@@ -4,6 +4,7 @@ from ..models import Task, Script, Result
 from ..database import db_session as sess
 import sys
 import os
+from time import sleep
 from subprocess import Popen, PIPE, STDOUT
 from celery.signals import task_revoked
 from datetime import datetime
@@ -41,6 +42,8 @@ class Persister():
 
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0):
+    while Task.query.filter(Task.task_id == self.request.id) is None:
+        sleep(1)
     nodes = 4
     completed = 0
     tid = self.request.id
@@ -95,7 +98,7 @@ def iterative_simulation(self, iterations=1, uid=0):
                           meta={'current': completed, 'total': iterations})
         t.status = "CANCELLED"
       
-    
+     
     logger.close()
 
     sess.commit()

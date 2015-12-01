@@ -74,8 +74,8 @@ print "Init iteration: {}".format(args['iter'])
 # Begin script
 clstr = read_data( '/var/www/fastGIS/app/scripts/cluster.dat' )
 
-nx = 50 ; xsteps = 7
-ny = 50 ; ysteps = 7
+nx = 50 ; xsteps = 3
+ny = 50 ; ysteps = 3
 xrng = np.linspace(0,nx,num=xsteps)
 yrng = np.linspace(0,ny,num=ysteps)
 
