@@ -73,8 +73,7 @@ int do_slave(int rank, META meta) {
     manage_script(rank, meta);
   } 
   else {
-    
-    // MPI msg listener
+     // MPI msg listener
     MPI_Status status;
     while (1) {
       MPI_Recv(&buff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
@@ -119,14 +118,18 @@ int manage_script(int rank, META meta){
   while (!DORMANT && !SHUTDOWN && (i++ < meta.iters) ) {
     printf("P%d: BEGIN %d\n", rank, i);
     // generate unique fname
-    sprintf(fname, "%d_%.*s_%d_%d", meta.uid, (int)strlen(meta.tid) - 1, meta.tid, rank, i);
+    sprintf(fname, "%d_%.*s_%d_%d", meta.uid, 
+	    (int)strlen(meta.tid) - 1, 
+	    meta.tid, rank, i);
     pid = exec_script(pfd, fname, meta.type); 
     
     // echo output of script
-    while (!DORMANT && !SHUTDOWN && (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) {
-      buff[nbytes] = '\0';
-      printf("P%d: SUBPROC: %s", rank, buff);
-    } 
+    while (!DORMANT && !SHUTDOWN && 
+	   (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) 
+      {
+	buff[nbytes] = '\0';
+	printf("P%d: SUBPROC: %s", rank, buff);
+      } 
 
     close(pfd[0]);
 
@@ -151,9 +154,6 @@ int manage_script(int rank, META meta){
 
 pid_t exec_script(int *pfd, char *fname, char *type) {
   pid_t pid;
-
-  printf("%s\n", type);
-  fflush(stdout);
  
  if (pipe(pfd) == -1)
     die("pipe");
