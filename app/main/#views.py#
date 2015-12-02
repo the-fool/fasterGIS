@@ -9,6 +9,7 @@ from ..scripts import simul_types
 from ..tasks import celtasks as cel
 import os
 from datetime import datetime
+
 @main.route('/')
 def index():
     return render_template('index.html')

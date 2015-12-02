@@ -58,6 +58,7 @@ class Task(Base):
     __tablename__ = 'tasks'
     id = Column(Integer, Sequence('task_sq'), primary_key=True)
     task_id = Column(String(256), unique=True)
+    simtype = Column(String(64))
     status = Column(String(150), default='Pending')
     name = Column(String(64), default=None)
     input = Column(String(512), default=None)
@@ -85,10 +86,8 @@ class Task(Base):
             'user_id'    : self.user_id,
             'date_done'  : dump_datetime(self.date_done),
             'date_begun' : dump_datetime(self.date_begun),
-            'type'       : self.get_type(self.task_id)
+            'simtype'    : self.simtype
         }
-    def get_type(self, task_id):
-        return Script.query.filter(Result.task_id == task_id).first().type
     
 class Result(Base):
     __tablename__ = 'results'

@@ -35,13 +35,18 @@ function init_task_table() {
 		align: 'center',
 		sortable: true
 	    }, {
+		title: 'Ended',
+		field: 'date_done',
+		align: 'center',
+		sortable: true
+	    }, {
                 title: 'Hash',
                 field: 'task_id',
                 align: 'center',
              
             }, {
                 title: 'Type',
-                field: 'type',
+                field: 'simtype',
                 align: 'center',
                 sortable: true
             }, {
@@ -63,6 +68,12 @@ function init_task_table() {
 
     $stop.click(function() {
 	var data = {'tid': getIdSelections()};
+	$('tr.selected').each(function() {
+	    var $that = $(this).find('td').last()
+	    if (($that.text() === "PENDING") || ($that.text() === "PROGRESS")) 
+		{ $that.text("Shutting down"); }
+	});
+	
 	$.ajax({
 	    url: '/api/shutdown',
 	    contentType: 'application/json',
@@ -86,10 +97,17 @@ function init_task_table() {
     $table.on('load-success.bs.table', function() {
 	$add.prop('disabled', false);
 	$stop.prop('disabled', true);
+	set_tr();
     });
-    
+    $table.on('reset-view.bs.table', function() {
+	set_tr();
+    });
 }
 
+function set_tr() {
+    $('tr:contains("CANCELLED")').css("background-color", "#E6C4C4");
+    $('tr:contains("FINISHED")').css("background-color", "#66E04E");
+}
 $(function() {
     init_task_table();
     

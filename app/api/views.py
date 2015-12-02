@@ -25,7 +25,8 @@ def shutdown():
     for x in request.get_json()['tid']:
        t =  Task.query.filter(Task.task_id == x).first()
        t.input = "SHUTDOWN"
-       t.status = "Shutting Down"
+       if t.status == "PROGRESS":
+           t.status = "Shutting Down"
        sess.commit()
        print "Shutdown ", t.name
     return jsonify({"Success": "very"}), 202 

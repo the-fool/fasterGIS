@@ -12,13 +12,20 @@ from datetime import datetime
 class Logger():
     flog = None
     def __init__(self, uid=0, tid='x'):
-        t = Task.query.filter(Task.task_id==tid).first()
-        t.log = '{0}/app/users/{1}/logs/{2}'.format(os.getcwd(), uid, tid) 
+        while True:
+            try:
+                print "querying"
+                t = Task.query.filter(Task.task_id==tid).first()
+                t.log = '{0}/app/users/{1}/logs/{2}'.format(os.getcwd(), uid, tid) 
+                sess.commit()
+                break
+            except:
+                sleep(1)
         udir = '{0}/app/users/{1}/logs'.format(os.getcwd(), uid)
         self.flog = open(os.path.join(udir,tid), 'w+', 0)
         self.uid = uid
         self.tid = tid
-        sess.commit()
+       
         
     def log(self, line=' '):
         if line[0] == 'P':
@@ -42,10 +49,6 @@ class Persister():
 
 @celery.task(bind=True)
 def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
-    sleep(1)
-    while not Task.query.filter(Task.task_id == self.request.id):
-        sleep(1)
-        sess.commit()
     nodes = 4
     completed = 0
     tid = self.request.id
@@ -102,8 +105,9 @@ def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
       
      
     logger.close()
-
+    t.date_done = datetime.now()
     sess.commit()
+    sess.remove()
     return {'current': completed, 'total': iterations, 'status': state,
             'result': state}
 
@@ -112,18 +116,4 @@ def simul_revoked(*args, **kwargs):
     print "I was revoked in celtask"
 
 
-
-def create_simulation(form):
-    task = iterative_simulation.delay(iterations=form.iterations.data, 
-                                      uid=current_user.get_id(),
-                                      simtype=form.simul_type.data)
-    sess.add(Task(task_id=task.id, 
-                  status=task.status, 
-                  user_id=current_user.get_id(), 
-                  name=form.name.data,
-                  date_begun=datetime.now()))
-    sess.add(Script(task_id=task.id, 
-                    iterations=form.iterations.data, 
-                    type=form.simul_type.data))
-    sess.commit()
     
