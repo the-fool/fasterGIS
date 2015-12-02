@@ -41,9 +41,11 @@ class Persister():
         
 
 @celery.task(bind=True)
-def iterative_simulation(self, iterations=1, uid=0):
-    while Task.query.filter(Task.task_id == self.request.id) is None:
+def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
+    sleep(1)
+    while not Task.query.filter(Task.task_id == self.request.id):
         sleep(1)
+        sess.commit()
     nodes = 4
     completed = 0
     tid = self.request.id
@@ -52,7 +54,7 @@ def iterative_simulation(self, iterations=1, uid=0):
     cwd = os.getcwd()
     proc = Popen(['/usr/bin/mpirun','-n', str(nodes + 1), 
                   '{0}/app/mpi/simulation'.format(cwd),
-                  str(uid), str(tid), str(iterations)], 
+                  str(uid), str(tid), str(iterations), str(simtype)],  
                  stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     state = 'PENDING'
     while True:
@@ -113,7 +115,8 @@ def simul_revoked(*args, **kwargs):
 
 def create_simulation(form):
     task = iterative_simulation.delay(iterations=form.iterations.data, 
-                                            uid=current_user.get_id())
+                                      uid=current_user.get_id(),
+                                      simtype=form.simul_type.data)
     sess.add(Task(task_id=task.id, 
                   status=task.status, 
                   user_id=current_user.get_id(), 

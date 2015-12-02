@@ -1,5 +1,5 @@
-from flask import render_template, redirect, url_for, abort, flash, jsonify, request,\
-send_from_directory
+from flask import render_template, make_response, redirect,\
+url_for, abort, flash, jsonify, request, send_from_directory
 from flask.ext.login import login_required, current_user
 from . import main
 from .forms import AddTaskForm
@@ -7,7 +7,7 @@ from ..database import db_session as sess
 from ..models import User, Task
 from ..scripts import simul_types
 from ..tasks import celtasks as cel
-
+import os
 
 @main.route('/')
 def index():
@@ -44,3 +44,10 @@ def results(task_id):
     t = Task.query.filter(Task.task_id == task_id).first()
     return render_template('results.html', t=t)
     #return send_from_directory('/var/www/fastGIS/', 'foo.png', as_attachment=False)
+
+@main.route('/user/results/img/<fname>')
+def img(fname):
+    path = os.path.join(os.getcwd(), 'app/users/{0}/results/{1}.png'.format(current_user.id, fname))
+    resp = make_response(open(path).read())
+    resp.content_type = 'image/png'
+    return resp

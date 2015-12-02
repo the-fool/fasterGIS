@@ -20,7 +20,7 @@ typedef struct {
 int do_master(int comm_size);
 int do_slave(int rank, META m);
 int manage_script(int rank, META m);
-pid_t exec_script(int *pfd, char *fname);
+pid_t exec_script(int *pfd, char *fname, char *type);
 
 int main(int argc, char *argv[]) {
 
@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   META meta;
   meta.uid = atoi(argv[1]);
   strncpy(meta.tid, argv[2], strlen(argv[2]));
+  strncpy(meta.type, argv[4], strlen(argv[4]));
   meta.iters = atoi(argv[3]) / (comm_size - 1);
 
   // divy the remaining iterations
@@ -119,7 +120,7 @@ int manage_script(int rank, META meta){
     printf("P%d: BEGIN %d\n", rank, i);
     // generate unique fname
     sprintf(fname, "%d_%.*s_%d_%d", meta.uid, (int)strlen(meta.tid) - 1, meta.tid, rank, i);
-    pid = exec_script(pfd, fname); 
+    pid = exec_script(pfd, fname, meta.type); 
     
     // echo output of script
     while (!DORMANT && !SHUTDOWN && (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) {
@@ -148,9 +149,10 @@ int manage_script(int rank, META meta){
   exit(0);
 } 
 
-pid_t exec_script(int *pfd, char *fname) {
+pid_t exec_script(int *pfd, char *fname, char *type) {
   pid_t pid;
- 
+
+  printf("%s\n", type);
   fflush(stdout);
  
  if (pipe(pfd) == -1)
@@ -163,7 +165,14 @@ pid_t exec_script(int *pfd, char *fname) {
     dup2(pfd[1], STDOUT_FILENO);
     close(pfd[0]); 
     close(pfd[1]);
-    execl("/var/www/fastGIS/venv/bin/python", "python",  "/var/www/fastGIS/app/scripts/sgs.py", fname, (char*)0 );
+    if (strcmp(type, "SSS") == 0)
+      execl("/var/www/fastGIS/venv/bin/python", 
+	    "python",  "/var/www/fastGIS/app/scripts/sss.py", 
+	    fname, (char*)0 );
+    else
+      execl("/var/www/fastGIS/venv/bin/python", 
+	    "python",  "/var/www/fastGIS/app/scripts/sgs.py", 
+	    fname, (char*)0 );
     die("execl");
   }
   close(pfd[1]);

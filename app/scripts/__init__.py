@@ -1,2 +1,2 @@
 simul_types = [('SGS', 'Sequential Gaussian Simulation'),
-               ('SIS', 'Sequential Indicator Simulation')]
+               ('SSS', 'Sequential Sleeper Simulation')]

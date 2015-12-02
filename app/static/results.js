@@ -53,5 +53,12 @@ function init_table() {
 
 $(function() {
     init_table();
-    
+    $('#table').on('click-row.bs.table', function(e, row, $element){
+	console.log(e); console.log(row); console.log($element);
+	var $mod = $('#img-modal');
+	var src = 'img/' + row['name'];
+	$mod.find('img').attr("src", src);
+	$mod.modal('show');
+	
+    });
 });

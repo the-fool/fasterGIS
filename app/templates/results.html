@@ -30,13 +30,30 @@
 
   <table id="table"
 	 data-url="/api/results/{{t.task_id}}"
-	 class="table-striped"
+	 class="table-striped custom-hover"
 	 data-toolbar="#toolbar"
          data-search="true"
          data-show-refresh="true"
          data-locale="en-US">
   </table>
 </div>
+<div id="img-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sample Plot</h4>
+      </div>
+      <div class="modal-body">
+       <img class="img-responsive" alt="image"></img>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 {% block scripts %}

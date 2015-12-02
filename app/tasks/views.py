@@ -41,31 +41,18 @@ def simul_status(task_id):
     else:
         response = {
             'state': task.state,
-            'current': 1,
-            'total': task.info.get('total',0),
+            'current': "Failed",
             'status': str(task.info),  # this is the exception raised
         }
     return jsonify(response)
 
-
-@tasks.route('/run_simulation', methods=['POST'])
-@login_required
-def run_simulation():
-    task = iterative_simulation.apply_async()
-    sess.add(Task(task_id=task.id, user_id=current_user.get_id()))
-    sess.commit()
-    return jsonify({}), 202, {'Progress': url_for('.simul_status',
-                                                  task_id=task.id),
-                              'Cancel': url_for('.cancel_simulation',
-                                                task_id=task.id), 
-                              'Revoke': url_for('.revoke_simulation',
-                                                task_id=task.id)}
 
 @tasks.route('/input/<task_id>', methods=['POST'])
 def input_foo(task_id):
     Task.query.filter(Task.task_id == task_id).update({"input": "check 1 2"})
     sess.commit()
     return jsonify({}), 202, {'OK': 'whatever'}
+
 @tasks.route('/revoke_foo/<task_id>', methods=['POST'])
 def revoke_simulation(task_id):
     return 'revoked'
