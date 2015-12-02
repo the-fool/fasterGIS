@@ -7,7 +7,7 @@ class AddTaskForm(Form):
                        validators=[Length(0,64, 
                        'Must be less than 64 characters')])
     iterations = IntegerField('Quantity of Iterations', 
-                   validators=[Required(), NumberRange(1, 1000, 
-                   message='Must be between 1 - 1000')])
+                   validators=[Required(), NumberRange(1, 100, 
+                   message='Must be between 1 - 100')])
     simul_type = SelectField('Type of Simulation')
     submit = SubmitField('Create')
