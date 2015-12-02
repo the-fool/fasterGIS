@@ -55,4 +55,3 @@ def init_celery(app):
     
     celery.Task = ContextTask
     return celery
-

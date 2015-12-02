@@ -66,9 +66,12 @@ function init_task_table() {
              $stop.prop('disabled', 
 			 !$table.bootstrapTable('getSelections').length);
 	     $table.data('selections', getIdSelections());
+	     set_tr();
          });
 
     $stop.click(function() {
+	$table.bootstrapTable('uncheckAll');
+	$('tr').removeClass('selected');
 	var data = {'tid': getIdSelections()};
 	$('tr.selected').each(function() {
 	    var $that = $(this).find('td').last()
@@ -82,7 +85,6 @@ function init_task_table() {
 	    method: 'POST',
 	    data: JSON.stringify(data),
 	    success: function(d,s) {
-		console.log('data:' + d);
 		console.log('status:' + s);
 	    },
 	    error: function() {
@@ -100,6 +102,7 @@ function init_task_table() {
 	$add.prop('disabled', false);
 	$stop.prop('disabled', true);
 	set_tr();
+	$table.find('td:contains("PENDING"), td:contains("PROGRESS")').each(update_status);
     });
     $table.on('reset-view.bs.table', function() {
 	set_tr();
@@ -108,7 +111,7 @@ function init_task_table() {
 
 function set_tr() {
     $('tr:contains("CANCELLED")').css("background-color", "#E6C4C4");
-    $('tr:contains("FINISHED")').css("background-color", "#739A6B");
+    $('tr:contains("FINISHED")').css("background-color", "#63A086");
 }
 $(function() {
     init_task_table();
@@ -134,6 +137,10 @@ $(function() {
 
 });
 
+function update_status(i, $e) {
+    console.log(i); console.log($e);
+}
+
 function update_progress(url, $pbar, $uptext) {
     $.getJSON(url, function(data) {
 	if (isNaN(data['current'])) { 
@@ -148,7 +155,6 @@ function update_progress(url, $pbar, $uptext) {
 	}
 	console.log(percent);
 	if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-            console.log(data['status']);
 	    if ('result' in data) {
                 $uptext.text('Result: ' + data['status'] + ' at ' + 
 			     data['current'] + ' out of ' + data['total'] +
