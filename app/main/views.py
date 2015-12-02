@@ -64,7 +64,4 @@ def create_simulation(form):
                   date_begun=datetime.now(),
                   date_done=None,
                   simtype=form.simul_type.data))
-    #sess.add(Script(task_id=task.id,
-    #              iterations=form.iterations.data,
-    #              type=form.simul_type.data))
     sess.commit()

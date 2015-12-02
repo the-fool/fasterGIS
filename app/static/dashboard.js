@@ -11,6 +11,8 @@ function init_task_table() {
 	exportTypes: ['json','xml','csv','txt'],
 //	height: 350,
         id: 'task_id',
+	sortName: 'date_begun',
+	sortOrder: 'desc',
 	detailView: true,
 	url: '/api/tasks?filter=uid_'+uid,
         columns: [
@@ -106,7 +108,7 @@ function init_task_table() {
 
 function set_tr() {
     $('tr:contains("CANCELLED")').css("background-color", "#E6C4C4");
-    $('tr:contains("FINISHED")').css("background-color", "#66E04E");
+    $('tr:contains("FINISHED")').css("background-color", "#739A6B");
 }
 $(function() {
     init_task_table();
@@ -154,9 +156,11 @@ function update_progress(url, $pbar, $uptext) {
 		$pbar.css('width', percent+'%');
 		$pbar.text(percent+'%');
 		if (data['status']=='CANCELLED') {
-		    $pbar.addClass('progress-bar-danger'); 
+		    $pbar.removeClass('active progress-bar-striped')
+			.addClass('progress-bar-danger'); 
 		} else if (data['status']=='FINISHED') {
-		    $pbar.addClass('progress-bar-success');
+		    $pbar.removeClass('active progress-bar-striped')
+			.addClass('progress-bar-success');
 		}
 	    }
             else {

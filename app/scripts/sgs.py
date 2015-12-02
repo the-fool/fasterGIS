@@ -20,17 +20,6 @@ from geostats import model as m
 import random
 
 def sgs( data, bw, path, xsteps, ysteps ):
-    '''
-    Input:  (data)   <N,3> NumPy array of data
-            (bw)     bandwidth of the semivariogram
-            (path)   randomized path through region of interest
-            (xsteps) number of cells in the x dimension
-            (ysteps) number of cells in the y dimension
-    Output: (M)      <xsteps,ysteps> NumPy array of data
-                     representing the simulated distribution
-                     of the variable of interest 
-    '''
-
     M = np.zeros((xsteps,ysteps))
 
     hs = np.arange(0,50,bw)

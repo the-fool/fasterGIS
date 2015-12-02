@@ -1,2 +1,2 @@
-simul_types = [('SGS', 'Sequential Gaussian Simulation'),
-               ('SSS', 'Sequential Sleeper Simulation')]
+simul_types = [('SSS', 'Sequential Sleeper Simulation'),
+               ('SGS', 'Sequential Gaussian Simulation')]

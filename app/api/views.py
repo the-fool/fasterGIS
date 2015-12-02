@@ -44,16 +44,16 @@ def zip_results():
     fname = fname.split('results/')[1]  
     return jsonify({"fname": fname}), 202 
     
+
 @api.route('/logs/<task_id>')
 def log(task_id):
-    path = Task.query.filter(Task.task_id == task_id).first().log
-    print path
+    path = '{0}/app/users/{1}/logs/{2}'.format(
+        os.getcwd(),current_user.id,task_id)
     with open(path, 'r') as f:
         l = [{'time': x.split(' ')[0].rstrip(']').lstrip('['), 'text': x.split(' ',1)[1].rstrip('\n')} for x in f]
-       
-    sess.commit()
     return Response(json.dumps(l), content_type='application/json', 
                     mimetype='application/json')
+
 
 @api.route('/results/<task_id>')
 def results(task_id):
@@ -63,11 +63,13 @@ def results(task_id):
 
 @api.route('/download/<fname>')
 def download(fname):
-    path = os.path.join(os.getcwd(),'app/users/{0}/results/'.format(current_user.id))
+    path = os.path.join(os.getcwd()
+                        ,'app/users/{0}/results/'.format(current_user.id))
     @after_this_request
     def remove_file(response):
         os.remove(os.path.join(path, fname + '.zip'))
         return response
+    
     return send_from_directory(path, fname+'.zip', as_attachment=True) 
 
 

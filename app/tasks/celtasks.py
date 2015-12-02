@@ -12,24 +12,15 @@ from datetime import datetime
 class Logger():
     flog = None
     def __init__(self, uid=0, tid='x'):
-        while True:
-            try:
-                print "querying"
-                t = Task.query.filter(Task.task_id==tid).first()
-                t.log = '{0}/app/users/{1}/logs/{2}'.format(os.getcwd(), uid, tid) 
-                sess.commit()
-                break
-            except:
-                sleep(1)
         udir = '{0}/app/users/{1}/logs'.format(os.getcwd(), uid)
         self.flog = open(os.path.join(udir,tid), 'w+', 0)
         self.uid = uid
         self.tid = tid
-       
         
     def log(self, line=' '):
         if line[0] == 'P':
-            self.flog.write('[{0}] {1}'.format(datetime.now().isoformat(), line))
+            self.flog.write('[{0}] {1}'.format(
+                datetime.now().isoformat(), line))
 
     def close(self):
         self.flog.close()
@@ -97,17 +88,19 @@ def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
             t.status = state
         sess.commit()
     proc.wait()
+
     if state == "SHUTTING DOWN":
         state = "CANCELLED"
         self.update_state(state=state, 
                           meta={'current': completed, 'total': iterations})
         t.status = "CANCELLED"
       
-     
     logger.close()
+
     t.date_done = datetime.now()
     sess.commit()
     sess.remove()
+
     return {'current': completed, 'total': iterations, 'status': state,
             'result': state}
 
