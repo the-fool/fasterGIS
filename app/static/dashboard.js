@@ -55,7 +55,7 @@ function init_task_table() {
 			 !$table.bootstrapTable('getSelections').length);
 	     $table.data('selections', getIdSelections());
          });
-    
+
     $stop.click(function() {
 	var data = {'tid': getIdSelections()};
 	$.ajax({
@@ -78,6 +78,11 @@ function init_task_table() {
             return row['task_id'];
         });
     }
+    $table.on('load-success.bs.table', function() {
+	$add.prop('disabled', false);
+	$stop.prop('disabled', true);
+    });
+    
 }
 
 $(function() {

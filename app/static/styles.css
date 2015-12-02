@@ -1,4 +1,23 @@
 .custom-hover > tbody > tr:not(.detail-view):hover td {
-    background-color:  #739Bf1 !important;
+    background-color:  #F1E88A !important;
     cursor: pointer;
+}
+thead {
+    background-color: #8ACE88;
+
+}
+body {
+    background-image: url("linen.png");
+}
+
+.well {
+    background-color: #615E46;
+}
+
+.table {
+    background-color: rgba(229, 239, 229, 0.96);
+}
+
+.status-well {
+    background-color:#C5BD5C;
 }

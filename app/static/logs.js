@@ -1,6 +1,8 @@
 function init_table() {
     var $table = $('#table');
     $table.bootstrapTable({
+	classes: 'table',
+	striped: true,
 	cache: false,
 	showExport: true,
         exportTypes: ['json','xml','csv','txt'],
