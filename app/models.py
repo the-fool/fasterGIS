@@ -47,6 +47,13 @@ class User(UserMixin, Base):
             if e.errno != errno.EEXIST:
                 raise
 
+class Script(Base):
+    __tablename__ = 'scripts'
+    id = Column(Integer, Sequence('script_sq'), primary_key=True)
+    task_id = Column(String(256), ForeignKey('tasks.task_id'))
+    type = Column(String(64))
+    iterations = Column(Integer, default=1)
+
 class Task(Base):
     __tablename__ = 'tasks'
     id = Column(Integer, Sequence('task_sq'), primary_key=True)
@@ -77,15 +84,11 @@ class Task(Base):
             'traceback'  : self.traceback,
             'user_id'    : self.user_id,
             'date_done'  : dump_datetime(self.date_done),
-            'date_begun' : dump_datetime(self.date_begun)
+            'date_begun' : dump_datetime(self.date_begun),
+            'type'       : self.get_type(self.task_id)
         }
-
-class Script(Base):
-    __tablename__ = 'scripts'
-    id = Column(Integer, Sequence('script_sq'), primary_key=True)
-    task_id = Column(String(256), ForeignKey('tasks.task_id'))
-    type = Column(String(64))
-    iterations = Column(Integer, default=1)
+    def get_type(self, task_id):
+        return Script.query.filter(Result.task_id == task_id).first().type
     
 class Result(Base):
     __tablename__ = 'results'

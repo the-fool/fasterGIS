@@ -2,6 +2,11 @@
     background-color:  #F1E88A !important;
     cursor: pointer;
 }
+.navbar-inverse {
+    background-color: #3E3A19;
+    color: #8ACE88;
+}
+
 thead {
     background-color: #8ACE88;
 

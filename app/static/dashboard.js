@@ -40,6 +40,11 @@ function init_task_table() {
                 align: 'center',
              
             }, {
+                title: 'Type',
+                field: 'type',
+                align: 'center',
+                sortable: true
+            }, {
                 title: 'Status',
                 field: 'status',
                 align: 'center',
