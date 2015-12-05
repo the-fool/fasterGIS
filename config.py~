@@ -1,4 +1,0 @@
-DBNAME = 'thomas'
-DBPASSWORD = 'cs430password'
-DBADDRESS= 'cs430.cxz5tqyviv19.us-west-2.rds.amazonaws.com:1521/ORCL'
-SECRET_KEY = 'MOUNTAIN_MAMAS_ON_THE_PROWL!!!'
