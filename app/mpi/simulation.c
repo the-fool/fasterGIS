@@ -169,6 +169,10 @@ pid_t exec_script(int *pfd, char *fname, char *type) {
       execl("/var/www/fastGIS/venv/bin/python", 
 	    "python",  "/var/www/fastGIS/app/scripts/sss.py", 
 	    fname, (char*)0 );
+    else if (strcmp(type, "MNDL") == 0)
+      execl("/var/www/fastGIS/venv/bin/python", 
+	    "python",  "/var/www/fastGIS/app/scripts/mndl.py", 
+	    fname, (char*)0 );
     else
       execl("/var/www/fastGIS/venv/bin/python", 
 	    "python",  "/var/www/fastGIS/app/scripts/sgs.py", 
