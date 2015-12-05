@@ -39,7 +39,8 @@ class Persister():
         
 
 @celery.task(bind=True)
-def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
+def iterative_simulation(self, iterations=1, uid=0, 
+                         simtype='SGS', data_set=''):
     nodes = 4
     completed = 0
     tid = self.request.id
@@ -48,7 +49,7 @@ def iterative_simulation(self, iterations=1, uid=0, simtype='SGS'):
     cwd = os.getcwd()
     proc = Popen(['/usr/bin/mpirun','-n', str(nodes + 1), 
                   '{0}/app/mpi/simulation'.format(cwd),
-                  str(uid), str(tid), str(iterations), str(simtype)],  
+                  str(uid), str(tid), str(iterations), str(simtype), data_set],  
                  stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     state = 'PENDING'
     while True:

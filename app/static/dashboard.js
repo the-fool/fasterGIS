@@ -70,8 +70,6 @@ function init_task_table() {
          });
 
     $stop.click(function() {
-	$table.bootstrapTable('uncheckAll');
-	$('tr').removeClass('selected');
 	var data = {'tid': getIdSelections()};
 	$('tr.selected').each(function() {
 	    var $that = $(this).find('td').last()
@@ -85,6 +83,8 @@ function init_task_table() {
 	    method: 'POST',
 	    data: JSON.stringify(data),
 	    success: function(d,s) {
+		$('tr').removeClass('selected');
+		$table.bootstrapTable('uncheckAll');
 		console.log('status:' + s);
 	    },
 	    error: function() {

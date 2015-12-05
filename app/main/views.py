@@ -9,6 +9,8 @@ from ..scripts import simul_types
 from ..tasks import celtasks as cel
 import os
 from datetime import datetime
+from werkzeug import secure_filename
+
 @main.route('/')
 def index():
     return render_template('index.html')
@@ -52,11 +54,19 @@ def img(fname):
     resp.content_type = 'image/png'
     return resp
 
-
+@login_required
 def create_simulation(form):
+    f = form.data_set.data
+    if f:
+        fname = secure_filename(f.filename)
+        f.save(os.path.join(os.getcwd(), 'app/users/{0}/data/{1}'
+                            .format(current_user.id, fname)))
+    else:
+        f = ''
     task = cel.iterative_simulation.delay(iterations=form.iterations.data,
-                                      uid=current_user.get_id(),
-                                      simtype=form.simul_type.data)
+                                          uid=current_user.get_id(),
+                                          simtype=form.simul_type.data, 
+                                          data_set=f)
     sess.add(Task(task_id=task.id,
                   status=task.status,
                   user_id=current_user.get_id(),
