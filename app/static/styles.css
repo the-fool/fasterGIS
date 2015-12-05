@@ -3,7 +3,7 @@
     cursor: pointer;
 }
 .navbar-inverse {
-    background-color: #3E3A19;
+    background-color: #4B1D5A;
     color: #8ACE88;
 }
 
@@ -12,11 +12,13 @@ thead {
 
 }
 body {
-    background-image: url("linen.png");
+    background-color: #F0EAF5;
+    #background-image: url("linen.png");
+    font-family: 'Lato', sans-serif;
 }
 
 .well {
-    background-color: #615E46;
+    background-color: #455F51;
 }
 
 .table {
@@ -24,5 +26,5 @@ body {
 }
 
 .status-well {
-    background-color:#C5BD5C;
+    background-color:#FBEBB1;
 }

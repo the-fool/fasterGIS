@@ -111,7 +111,7 @@ function init_task_table() {
 
 function set_tr() {
     $('tr:contains("CANCELLED")').css("background-color", "#E6C4C4");
-    $('tr:contains("FINISHED")').css("background-color", "#63A086");
+    $('tr:contains("FINISHED")').css("background-color", "#4EA050");
 }
 $(function() {
     init_task_table();
