@@ -1,5 +1,0 @@
-from .. import celery
-
-@celery.taskfoo
-def mult(a, b):
-    return a * b
