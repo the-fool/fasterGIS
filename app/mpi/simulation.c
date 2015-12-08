@@ -8,7 +8,7 @@
 #define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
 #define MAX_BUFF 4096
 
-
+// Meta-data about the simulation to be run
 typedef struct {
   int iters;
   int uid;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-  
+  // set metadata about the simulation
   META meta;
   meta.uid = atoi(argv[1]);
   strncpy(meta.tid, argv[2], strlen(argv[2]));
@@ -54,7 +54,9 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
 }
 
-
+// signal handlers for the simulation proc
+// When dormant flag is set, the proc pauses for a wake-up signal
+// when shutdown flag is set, the proc kills the python sim and terminates
 int DORMANT = 0, SHUTDOWN=0;
 void go_dormant(int signum) {
   DORMANT = !DORMANT;
@@ -66,19 +68,21 @@ void terminate(int signum) {
 int do_slave(int rank, META meta) {
   pid_t pid;
   char buff[MAX_BUFF];
-  
+  // fork a proc to manage the simulation
   if ((pid=fork()) == -1)
     die("fork");
   if (pid == 0) {
     manage_script(rank, meta);
   } 
   else {
-     // MPI msg listener
+     // the parent remains as the mpi listener
     MPI_Status status;
     while (1) {
       MPI_Recv(&buff, MAX_BUFF, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+   
       printf("P%d: RECV: %s\n", rank, buff);   
       fflush(stdout);
+      
       if (strcmp(buff, "PAUSE") == 0) {
 	kill(pid, SIGUSR1);
       }
@@ -105,6 +109,7 @@ int manage_script(int rank, META meta){
   char buff[MAX_BUFF], fname[256];
   pid_t pid;
 
+  // Register sig-handlers
   struct sigaction dormant, shutdown;
   dormant.sa_handler = go_dormant;
   shutdown.sa_handler = terminate;
@@ -117,13 +122,15 @@ int manage_script(int rank, META meta){
 
   while (!DORMANT && !SHUTDOWN && (i++ < meta.iters) ) {
     printf("P%d: BEGIN %d\n", rank, i);
-    // generate unique fname
+    // generate unique file name
     sprintf(fname, "%d_%.*s_%d_%d", meta.uid, 
 	    (int)strlen(meta.tid) - 1, 
 	    meta.tid, rank, i);
+    // fork off the simulation
     pid = exec_script(pfd, fname, meta.type); 
     
     // echo output of script
+    // exit loop under normal circumstances when simulation terminates
     while (!DORMANT && !SHUTDOWN && 
 	   (nbytes = read(pfd[0], buff, MAX_BUFF)) > 0) 
       {
@@ -133,7 +140,7 @@ int manage_script(int rank, META meta){
 
     close(pfd[0]);
 
-    // check if EOF or SIGUSR
+    // when loop is broken, check if EOF or SIGUSR
     if (DORMANT) {
       kill(pid, SIGINT);
       waitpid(pid, NULL, 0);
@@ -142,7 +149,8 @@ int manage_script(int rank, META meta){
       printf("P%d: ATEMPTING SHUTDOWN\n", rank);
       kill(pid, SIGINT);
       waitpid(pid, NULL, 0);
-    } else {
+    } // normal case 
+    else {
       waitpid(pid, NULL, 0);
       printf("P%d: COMPLETED %s\n", rank, fname);
     }
@@ -160,11 +168,14 @@ pid_t exec_script(int *pfd, char *fname, char *type) {
   if ((pid=fork()) == -1)
     die("fork");
   if (pid == 0) {
+    // unregister sig-handlers before exec call
     signal(SIGUSR1, SIG_DFL);
     signal(SIGUSR2, SIG_DFL);
+    // set up piped i/o
     dup2(pfd[1], STDOUT_FILENO);
     close(pfd[0]); 
     close(pfd[1]);
+    // determine which sim to execute
     if (strcmp(type, "SSS") == 0)
       execl("/var/www/fastGIS/venv/bin/python", 
 	    "python",  "/var/www/fastGIS/app/scripts/sss.py", 
@@ -179,6 +190,7 @@ pid_t exec_script(int *pfd, char *fname, char *type) {
 	    fname, (char*)0 );
     die("execl");
   }
+  // in the parent here
   close(pfd[1]);
   return pid;
 }
@@ -188,7 +200,7 @@ int do_master(int comm_size) {
   char buff[MAX_BUFF];
   char *cptr;
   int i=0;
-  
+  // master listens to stdin from Celery worker 
   while (1) {
     fgets(buff, MAX_BUFF, stdin);
     if ( (cptr = strchr(buff, '\n')) != NULL) *cptr = '\0';
@@ -214,6 +226,7 @@ int do_master(int comm_size) {
 }
 
 int send_all(int comm_size, char* msg) {
+  // subroutine to send an MPI message to every proc except the master
   int i = 0;
   while (++i < comm_size) 
     MPI_Send(msg, strlen(msg) + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD);
