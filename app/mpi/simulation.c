@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
 #define MAX_BUFF 4096
@@ -108,6 +109,7 @@ int manage_script(int rank, META meta){
   int pfd[2], nbytes, i=0; 
   char buff[MAX_BUFF], fname[256];
   pid_t pid;
+  int status;
 
   // Register sig-handlers
   struct sigaction dormant, shutdown;
@@ -151,8 +153,14 @@ int manage_script(int rank, META meta){
       waitpid(pid, NULL, 0);
     } // normal case 
     else {
-      waitpid(pid, NULL, 0);
-      printf("P%d: COMPLETED %s\n", rank, fname);
+      waitpid(pid, &status, 0);
+      if (!WIFEXITED(status) || WEXITSTATUS(status) != EXIT_SUCCESS){
+	// simulation did not run to cmopletion
+	printf("P%d: ERROR in sim.  Restarting\n", rank);
+	i--;
+      }
+      else
+	printf("P%d: COMPLETED %s\n", rank, fname);
     }
   }
   printf("P%d: FINISHED\n", rank);

@@ -11,7 +11,7 @@ from celery.signals import task_revoked
 
 @tasks.route('/simul_status/<task_id>')
 def simul_status(task_id):
-"""Return response to client's AJAX request for updates on simulation"""
+    # returns response to client's AJAX request
     task = iterative_simulation.AsyncResult(task_id)
 
     if task.state == 'PENDING':
